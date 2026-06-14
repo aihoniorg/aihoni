@@ -17,7 +17,10 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.nepfinder.aihoni",
       "icon": "./assets/icon.png",
-      "associatedDomains": ["applinks:aihoni.com", "applinks:www.aihoni.com"],
+      "associatedDomains": [
+        "applinks:aihoni.com",
+        "applinks:www.aihoni.com"
+      ],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -33,10 +36,19 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
-            { "scheme": "https", "host": "aihoni.com" },
-            { "scheme": "https", "host": "www.aihoni.com" }
+            {
+              "scheme": "https",
+              "host": "aihoni.com"
+            },
+            {
+              "scheme": "https",
+              "host": "www.aihoni.com"
+            }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -49,7 +61,9 @@
           "color": "#3B76EF",
           "defaultChannel": "default"
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {

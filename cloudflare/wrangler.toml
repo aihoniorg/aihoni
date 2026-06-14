@@ -17,7 +17,6 @@ binding = "CACHE"
 id = "c099c94a10b44aaab50b1a2e2308ad36"
 
 # R2 media bucket — accessed as `env.MEDIA`
-# (uncomment once R2 is enabled in the dashboard)
-# [[r2_buckets]]
-# binding = "MEDIA"
-# bucket_name = "aihoni-media"
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "aihoni"

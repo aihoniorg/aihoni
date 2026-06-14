@@ -4,6 +4,7 @@
 interface Env {
   DB?: D1Database;
   CACHE?: KVNamespace;
+  MEDIA?: R2Bucket;
 }
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
@@ -31,6 +32,19 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
     kv = `error: ${(e as Error).message}`;
   }
 
+  // probe R2
+  let r2: 'ok' | string = 'unbound';
+  let mediaCount = 0;
+  try {
+    if (ctx.env.MEDIA) {
+      const list = await ctx.env.MEDIA.list({ limit: 1 });
+      mediaCount = list.objects.length;
+      r2 = 'ok';
+    }
+  } catch (e) {
+    r2 = `error: ${(e as Error).message}`;
+  }
+
   return new Response(
     JSON.stringify({
       ok: true,
@@ -42,7 +56,8 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
       },
       db,
       kv,
-      sample: { businesses: businessCount },
+      r2,
+      sample: { businesses: businessCount, mediaPreview: mediaCount },
     }),
     {
       headers: {

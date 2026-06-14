@@ -21,6 +21,7 @@ import {
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { NavProvider, useNav } from './src/nav';
+import { AuthProvider } from './src/auth';
 import { SCREENS } from './src/screens';
 import { SplashScreen } from './src/SplashScreen';
 
@@ -81,9 +82,11 @@ function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      <NavProvider>
-        <AppContent />
-      </NavProvider>
+      <AuthProvider>
+        <NavProvider>
+          <AppContent />
+        </NavProvider>
+      </AuthProvider>
       {(showSplash || !fontsLoaded) && (
         <SplashScreen onFinish={() => setShowSplash(false)} />
       )}

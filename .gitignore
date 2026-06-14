@@ -6,5 +6,16 @@ dist-ssr
 .vite
 *.tsbuildinfo
 .expo
-secrets/
+secrets/*
+!secrets/README.md
 *.keystore
+*.jks
+*.p12
+*.p8
+*.mobileprovision
+*-credentials*.json
+google-services.json
+GoogleService-Info.plist
+.env
+.env.*
+!.env.example

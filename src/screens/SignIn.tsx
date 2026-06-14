@@ -1,11 +1,19 @@
-import { View, Text } from 'react-native';
+import { useEffect } from 'react';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { AHScreen, AHProgress, AHTitle, AHButton, AHOrb } from '../components/ui';
-import { AH_BRAND_FONT, INK, BG_SOFT, FAINT } from '../theme';
+import { AH_BRAND_FONT, INK, BG_SOFT, FAINT, ACCENT } from '../theme';
 import { useNav } from '../nav';
+import { useAuth } from '../auth';
 
 // 03 · Sign in — Google / Apple, no passwords.
 export function SignIn() {
   const nav = useNav();
+  const { user, loading, signInWithGoogle } = useAuth();
+
+  // Auto-advance after a successful sign-in
+  useEffect(() => {
+    if (user) nav.next();
+  }, [user, nav]);
   return (
     <AHScreen>
       <AHProgress step={1} />
@@ -22,32 +30,37 @@ export function SignIn() {
         <View style={{ flexDirection: 'column', gap: 12, marginTop: 6 }}>
           <AHButton
             kind="outline"
-            onClick={nav.next}
+            disabled={loading}
+            onClick={signInWithGoogle}
             icon={
-              <View
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: 12,
-                  backgroundColor: BG_SOFT,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Text
+              loading ? (
+                <ActivityIndicator size="small" color={ACCENT} />
+              ) : (
+                <View
                   style={{
-                    fontWeight: '800',
-                    fontSize: 14,
-                    color: INK,
-                    fontFamily: AH_BRAND_FONT,
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
+                    backgroundColor: BG_SOFT,
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
-                  G
-                </Text>
-              </View>
+                  <Text
+                    style={{
+                      fontWeight: '800',
+                      fontSize: 14,
+                      color: INK,
+                      fontFamily: AH_BRAND_FONT,
+                    }}
+                  >
+                    G
+                  </Text>
+                </View>
+              )
             }
           >
-            Continue with Google
+            {loading ? 'Checking session…' : 'Continue with Google'}
           </AHButton>
           <AHButton
             kind="dark"

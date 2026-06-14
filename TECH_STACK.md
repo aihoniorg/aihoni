@@ -170,14 +170,16 @@ wrangler d1 execute aihoni-db --remote --command="SELECT * FROM businesses"
 | Typical use | API response caching (60s+ TTL), feature flags, push-token-by-user index |
 | **Caveat** | `expirationTtl` minimum is **60 seconds** |
 
-### Cloudflare R2 (object storage) — pending
+### Cloudflare R2 (object storage)
 
 | Setting | Value |
 |---|---|
-| Bucket name (planned) | `aihoni-media` |
-| Binding (planned) | `env.MEDIA` (typed `R2Bucket`) |
+| Bucket name | `aihoni` |
+| Binding | `env.MEDIA` (typed `R2Bucket`) |
 | Use | Voice notes (`.m4a`), product photos, knowledge PDFs, profile avatars |
-| Status | ⚠️ Requires one-time R2 activation at https://dash.cloudflare.com → R2 → Enable. Once enabled, run the `r2_bucket_create` MCP call or `wrangler r2 bucket create aihoni-media`. Then uncomment the `[[r2_buckets]]` block in `cloudflare/wrangler.toml` and redeploy. |
+| Endpoints | `POST /api/media/upload` (auth required) + `GET /api/media/<key>` (public, 24h edge cache) |
+| Key format | `media/<userId>/<timestamp>-<rand>.<ext>` |
+| Max upload | 25 MB · allowed types: `image/*`, `audio/*`, `video/*`, `application/pdf` |
 
 ### Bindings in `cloudflare/wrangler.toml`
 
@@ -191,9 +193,9 @@ database_id   = "94a0f87b-527e-4220-9f3a-367ce804cf75"
 binding = "CACHE"
 id      = "c099c94a10b44aaab50b1a2e2308ad36"
 
-# [[r2_buckets]]    # uncomment after enabling R2
-# binding     = "MEDIA"
-# bucket_name = "aihoni-media"
+[[r2_buckets]]
+binding     = "MEDIA"
+bucket_name = "aihoni"
 ```
 
 Pages Functions receive these as `ctx.env.DB`, `ctx.env.CACHE`, `ctx.env.MEDIA`.
@@ -227,7 +229,63 @@ wrangler pages deploy public --project-name=aihoni --branch=main
 
 ---
 
-## 5. Local development
+## 5. Secrets, auth, and the trust boundary
+
+The hard rule: **anything bundled into the app binary is extractable**. So:
+
+```
+┌─────────────────┐   JWT      ┌──────────────────────────┐  secrets  ┌──────────────────┐
+│  Expo app       │ ─────────► │  Cloudflare Functions    │ ────────► │  3rd-party APIs  │
+│  SecureStore:   │ Bearer hdr │  (D1 + KV + Secrets)     │           │  Google JWKS,    │
+│   - session JWT │            │                          │           │  OpenAI, etc.    │
+└─────────────────┘            └──────────────────────────┘           └──────────────────┘
+```
+
+Three secret stores, one rule for each:
+
+| Where | What lives there | Set with |
+|---|---|---|
+| **Cloudflare Pages Secrets** (server-only, encrypted at rest) | `JWT_SECRET`, `GOOGLE_CLIENT_IDS`, future `OPENAI_API_KEY`, `STRIPE_SECRET_KEY` etc. | `wrangler pages secret put NAME --project-name=aihoni` |
+| **EAS Secrets / Env Vars** (build-time only, never in bundle) | `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`, `ASC_APP_ID`, `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | `./scripts/setup-eas-secrets.sh` (or `eas env:create` directly) |
+| **EAS Plaintext Env Vars** (public, baked into bundle) | `EXPO_PUBLIC_API_BASE`, `EXPO_PUBLIC_GOOGLE_*_CLIENT_ID` | same script — these are config, not secrets |
+
+### Authentication flow — Google Sign-In
+
+1. App → Google OAuth (`expo-auth-session`) → returns `id_token`
+2. App → `POST /api/auth/google` with `{ id_token }`
+3. Edge function (`cloudflare/functions/api/auth/google.ts`):
+   - fetches Google's public JWKS (cached 1h in KV)
+   - verifies RS256 signature, `iss`, `aud` (must match one of `GOOGLE_CLIENT_IDS`), `exp`, `email_verified`
+   - upserts user in `users` table (keyed by `g_<google_sub>`)
+   - signs HS256 JWT with `JWT_SECRET`, returns it + user
+4. App stores JWT in **iOS Keychain / Android Keystore** via `expo-secure-store`
+5. Every subsequent API call sends `Authorization: Bearer <jwt>`
+6. Server functions verify with `readAuth(request, env.JWT_SECRET)` from `_lib/auth.ts`
+
+### Auth code map
+
+| File | Purpose |
+|---|---|
+| `cloudflare/functions/_lib/auth.ts` | HS256 sign/verify (Web Crypto, zero deps), `readAuth()` helper |
+| `cloudflare/functions/_lib/google.ts` | RS256 + JWKS verifier for Google ID tokens, KV-cached keys |
+| `cloudflare/functions/api/auth/google.ts` | `POST` — exchange Google `id_token` for our JWT |
+| `cloudflare/functions/api/auth/me.ts` | `GET` — return current user (requires Bearer token) |
+| `src/apiClient.ts` (Expo) | Typed `api()` fetch wrapper, auto Bearer header, `setSessionToken()`, `ApiError` |
+| `src/auth.tsx` (Expo) | `AuthProvider` + `useAuth()` context, `signInWithGoogle()`, `signOut()`, session restore on cold start |
+| `src/screens/SignIn.tsx` | "Continue with Google" button wired to `signInWithGoogle()` + auto-advance on success |
+| `GOOGLE_SIGNIN_SETUP.md` | Step-by-step Google Cloud Console setup with troubleshooting |
+
+### Active secrets (as of today)
+
+```
+$ wrangler pages secret list --project-name=aihoni
+  - JWT_SECRET:        Value Encrypted   (32 bytes random, set 2026-06-14)
+  - GOOGLE_CLIENT_IDS: Value Encrypted   (TODO placeholder — replace with real OAuth IDs)
+```
+
+---
+
+## 6. Local development
 
 ```bash
 # Start Metro
@@ -248,7 +306,7 @@ npx expo-doctor
 
 ---
 
-## 6. Top-level file layout
+## 7. Top-level file layout
 
 ```
 aihoni/
@@ -262,6 +320,8 @@ aihoni/
 ├── src/
 │   ├── theme.ts                # Colors, fonts, mixWithWhite helper
 │   ├── nav.tsx                 # Custom React-context navigation
+│   ├── auth.tsx                # AuthProvider + useAuth() + Google sign-in
+│   ├── apiClient.ts            # Bearer-auth fetch wrapper + SecureStore session
 │   ├── notifications.ts        # Push registration + helpers
 │   ├── deeplinks.ts            # URL → ScreenId resolver
 │   ├── SplashScreen.tsx        # JS splash (icon fade-in)
@@ -276,17 +336,29 @@ aihoni/
 │   │   ├── index.html
 │   │   ├── _headers
 │   │   └── .well-known/
-│   ├── functions/api/          # Pages Functions (edge API)
+│   ├── functions/
+│   │   ├── _lib/
+│   │   │   ├── auth.ts         # HS256 JWT sign/verify (Web Crypto)
+│   │   │   └── google.ts       # Google ID-token verifier (RS256+JWKS)
+│   │   └── api/
+│   │       ├── auth/google.ts  # POST — exchange Google id_token for our JWT
+│   │       ├── auth/me.ts      # GET — current user (Bearer)
+│   │       ├── businesses.ts   # GET — list businesses (KV-cached)
+│   │       ├── chats.ts        # GET — inbox
+│   │       └── health.ts       # GET — D1/KV health probe
+│   ├── migrations/0001_init.sql
 │   ├── wrangler.toml
 │   └── README.md
 │
-├── .eas/workflows/             # EAS CI/CD YAML
-└── android/                    # Native android (generated via expo prebuild)
+├── scripts/setup-eas-secrets.sh # One-shot EAS env/secrets provisioning
+├── .eas/workflows/              # EAS CI/CD YAML
+├── GOOGLE_SIGNIN_SETUP.md       # Google Cloud Console step-by-step
+└── android/                     # Native android (generated via expo prebuild)
 ```
 
 ---
 
-## 7. Service inventory
+## 8. Service inventory
 
 | Service | Plan | What we use |
 |---|---|---|
@@ -298,7 +370,7 @@ aihoni/
 
 ---
 
-## 8. Identifiers cheat-sheet
+## 9. Identifiers cheat-sheet
 
 | Thing | Value |
 |---|---|
@@ -316,19 +388,21 @@ aihoni/
 | Cloudflare Pages project | `aihoni` (live at `aihoni.pages.dev` and `aihoni.com`) |
 | Cloudflare D1 database | `aihoni-db` (`94a0f87b-527e-4220-9f3a-367ce804cf75`) |
 | Cloudflare KV namespace | `aihoni-cache` (`c099c94a10b44aaab50b1a2e2308ad36`) |
-| Cloudflare R2 bucket | `aihoni-media` (pending R2 enable) |
+| Cloudflare R2 bucket | `aihoni` |
 | GitHub repo | `aihoniorg/aihoni` |
 
 ---
 
-## 9. Open TODOs (placeholders to fill before production)
+## 10. Open TODOs (placeholders to fill before production)
 
-| File | Placeholder | How to fill |
+| File / Resource | Placeholder | How to fill |
 |---|---|---|
 | `cloudflare/public/.well-known/apple-app-site-association` | `TODO_APPLE_TEAM_ID` (×2) | developer.apple.com → Membership → Team ID |
 | `cloudflare/public/.well-known/assetlinks.json` | `TODO_REPLACE_WITH_SHA256_FROM_EAS` | `eas credentials -p android` → SHA-256 fingerprint |
 | `eas.json` (submit.ios) | `TODO_APPLE_APP_ID` | appstoreconnect.apple.com → app numeric ID |
 | `eas.json` (submit.ios) | `TODO_APPLE_TEAM_ID` | same as above |
+| Cloudflare secret `GOOGLE_CLIENT_IDS` | `TODO_REPLACE_WITH_GOOGLE_OAUTH_CLIENT_IDS` | Follow `GOOGLE_SIGNIN_SETUP.md` to get 3 OAuth client IDs, then `echo "WEB,IOS,ANDROID" \| wrangler pages secret put GOOGLE_CLIENT_IDS --project-name=aihoni` |
+| `scripts/setup-eas-secrets.sh` | All `TODO_*` values at the top | Fill in real Apple/Google client IDs + credentials, then `./scripts/setup-eas-secrets.sh` |
 | `eas.json` (submit.android) | `./secrets/play-service-account.json` | Google Cloud → service account JSON key |
 
 After filling these, redeploy Cloudflare (`wrangler pages deploy …`) and you're production-ready.
