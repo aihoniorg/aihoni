@@ -1,59 +1,190 @@
+import { View, Text, Pressable } from 'react-native';
 import { AHScreen, AHButton } from '../components/ui';
 import { ImageSlot } from '../components/ImageSlot';
+import { INK, ACCENT, MUTED, LINE2, ACCENT_SOFT } from '../theme';
 import { useNav } from '../nav';
+import Svg, { Path, Circle } from 'react-native-svg';
 
-// 18 · Order from reel — bottom sheet with quantity, delivery, pay-with-eSewa.
+// 19 · Order from reel — bottom sheet with quantity, delivery, pay-with-eSewa.
 export function Order() {
   const nav = useNav();
   return (
-    <AHScreen pad={false} style={{ background: '#000', position: 'relative', justifyContent: 'flex-end' }}>
-      <ImageSlot placeholder="Product reel" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
-      <div onClick={nav.back} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
+    <AHScreen
+      pad={false}
+      style={{ backgroundColor: '#000', position: 'relative', justifyContent: 'flex-end' }}
+    >
+      <ImageSlot
+        placeholder="Product reel"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
+      <Pressable
+        onPress={nav.back}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.4)',
+        }}
+      />
 
-      <div style={{ position: 'relative', background: '#FFFFFF', borderRadius: '26px 26px 0 0', padding: '12px 22px 38px', boxShadow: '0 -10px 40px rgba(0,0,0,0.3)' }}>
-        <div style={{ width: 40, height: 5, borderRadius: 99, background: '#E2E2E2', margin: '0 auto 18px' }} />
+      <View
+        style={{
+          position: 'relative',
+          backgroundColor: '#fff',
+          borderTopLeftRadius: 26,
+          borderTopRightRadius: 26,
+          padding: 12,
+          paddingHorizontal: 22,
+          paddingBottom: 38,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -10 },
+          shadowOpacity: 0.3,
+          shadowRadius: 40,
+          elevation: 10,
+        }}
+      >
+        <View
+          style={{
+            width: 40,
+            height: 5,
+            borderRadius: 99,
+            backgroundColor: '#E2E2E2',
+            alignSelf: 'center',
+            marginBottom: 18,
+          }}
+        />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
-          <div style={{ width: 56, height: 56, borderRadius: 15, background: 'color-mix(in oklch, var(--ah-orange) 18%, white)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>🍚</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 17, fontWeight: 700 }}>Basmati चामल · 25kg</div>
-            <div style={{ fontSize: 13, color: 'var(--ah-muted)', marginTop: 1 }}>Shrestha Kirana Pasal · Lagankhel</div>
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--ah-orange)' }}>रू 2,350</div>
-        </div>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 13 }}>
+          <View
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 15,
+              backgroundColor: ACCENT_SOFT,
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Text style={{ fontSize: 26 }}>🍚</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 17, fontWeight: '700', color: INK }}>
+              {'Basmati चामल · 25kg'}
+            </Text>
+            <Text style={{ fontSize: 13, color: MUTED, marginTop: 1 }}>
+              {'Shrestha Kirana Pasal · Lagankhel'}
+            </Text>
+          </View>
+          <Text style={{ fontSize: 18, fontWeight: '800', color: ACCENT }}>
+            {'रू 2,350'}
+          </Text>
+        </View>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 20 }}>
-          <span style={{ fontSize: 15, fontWeight: 600 }}>Quantity</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: '#fff', borderRadius: 99, padding: '7px 16px', border: '1.5px solid var(--ah-line2)' }}>
-            <span style={{ fontSize: 20, fontWeight: 600, color: 'var(--ah-muted)' }}>−</span>
-            <span style={{ fontSize: 16, fontWeight: 700, minWidth: 16, textAlign: 'center' }}>1</span>
-            <span style={{ fontSize: 20, fontWeight: 600, color: 'var(--ah-orange)' }}>+</span>
-          </div>
-        </div>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: 20,
+          }}
+        >
+          <Text style={{ fontSize: 15, fontWeight: '600', color: INK }}>Quantity</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 16,
+              backgroundColor: '#fff',
+              borderRadius: 99,
+              paddingHorizontal: 16,
+              paddingVertical: 7,
+              borderWidth: 1.5,
+              borderColor: LINE2,
+            }}
+          >
+            <Text style={{ fontSize: 20, fontWeight: '600', color: MUTED }}>−</Text>
+            <Text
+              style={{ fontSize: 16, fontWeight: '700', minWidth: 16, textAlign: 'center', color: INK }}
+            >
+              1
+            </Text>
+            <Text style={{ fontSize: 20, fontWeight: '600', color: ACCENT }}>+</Text>
+          </View>
+        </View>
 
-        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 9 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 11, border: '2px solid var(--ah-orange)', background: 'color-mix(in oklch, var(--ah-orange) 12%, white)', borderRadius: 16, padding: '13px 15px' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M3 13h13V6H3zM16 9h4l1 4v3h-5M7 18.5A1.5 1.5 0 1 1 7 15.5a1.5 1.5 0 0 1 0 3zM18 18.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" stroke="var(--ah-orange)" strokeWidth="1.7" strokeLinejoin="round" />
-            </svg>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14.5, fontWeight: 700 }}>घर डेलिभरी · Home delivery</div>
-              <div style={{ fontSize: 12, color: 'var(--ah-muted)' }}>Lagankhel · ~30 min · रू 50</div>
-            </div>
-            <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--ah-orange)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="10" height="8" viewBox="0 0 12 10">
-                <path d="M1 5l3.2 3.4L11 1" stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-          </div>
-        </div>
+        <View style={{ marginTop: 16, flexDirection: 'column', gap: 9 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 11,
+              borderWidth: 2,
+              borderColor: ACCENT,
+              backgroundColor: ACCENT_SOFT,
+              borderRadius: 16,
+              padding: 13,
+              paddingHorizontal: 15,
+            }}
+          >
+            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M3 13h13V6H3zM16 9h4l1 4v3h-5M7 18.5A1.5 1.5 0 1 1 7 15.5a1.5 1.5 0 0 1 0 3zM18 18.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"
+                stroke={ACCENT}
+                strokeWidth={1.7}
+                strokeLinejoin="round"
+              />
+            </Svg>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 14.5, fontWeight: '700', color: INK }}>
+                {'घर डेलिभरी · Home delivery'}
+              </Text>
+              <Text style={{ fontSize: 12, color: MUTED }}>
+                {'Lagankhel · ~30 min · रू 50'}
+              </Text>
+            </View>
+            <View
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                backgroundColor: ACCENT,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Svg width={10} height={8} viewBox="0 0 12 10">
+                <Path
+                  d="M1 5l3.2 3.4L11 1"
+                  stroke="#fff"
+                  strokeWidth={2.4}
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </View>
+          </View>
+        </View>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', margin: '18px 2px 14px' }}>
-          <span style={{ fontSize: 14, color: 'var(--ah-muted)', fontWeight: 600 }}>Total</span>
-          <span style={{ fontSize: 22, fontWeight: 800 }}>रू 2,400</span>
-        </div>
-        <AHButton kind="orange">Order · eSewa बाट तिर्नुहोस्</AHButton>
-      </div>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            marginVertical: 18,
+            marginHorizontal: 2,
+          }}
+        >
+          <Text style={{ fontSize: 14, color: MUTED, fontWeight: '600' }}>Total</Text>
+          <Text style={{ fontSize: 22, fontWeight: '800', color: INK }}>{'रू 2,400'}</Text>
+        </View>
+        <AHButton kind="orange">
+          {'Order · eSewa बाट तिर्नुहोस्'}
+        </AHButton>
+      </View>
     </AHScreen>
   );
 }

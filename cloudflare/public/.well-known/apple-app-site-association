@@ -1,0 +1,43 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["TODO_APPLE_TEAM_ID.com.nepfinder.aihoni"],
+        "components": [
+          {
+            "/": "/chat/*",
+            "comment": "Open a chat by ID"
+          },
+          {
+            "/": "/business/*",
+            "comment": "Open a business page"
+          },
+          {
+            "/": "/reel/*",
+            "comment": "Open a reel"
+          },
+          {
+            "/": "/order/*",
+            "comment": "Open an order"
+          },
+          {
+            "/": "/profile",
+            "comment": "Open profile"
+          },
+          {
+            "/": "/feed",
+            "comment": "Open feed"
+          },
+          {
+            "/": "/",
+            "comment": "Open root → Chats"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["TODO_APPLE_TEAM_ID.com.nepfinder.aihoni"]
+  }
+}

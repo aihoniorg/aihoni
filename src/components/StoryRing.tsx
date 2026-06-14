@@ -1,5 +1,7 @@
-// ── Story-ring avatar (accent ring like the reference) ──
-// Shows a default silhouette (person or storefront) when no photo is present.
+import { View, Text } from 'react-native';
+import Svg, { Circle, Path } from 'react-native-svg';
+import { LINE2, ACCENT, AH_BRAND_FONT } from '../theme';
+
 export function AHStoryRing({
   size = 62,
   glyph,
@@ -17,78 +19,84 @@ export function AHStoryRing({
   label?: string;
   photo?: string;
 }) {
-  const ringColor = add ? '#C9C9CE' : seen ? 'var(--ah-line)' : 'var(--ah-orange)';
-  const ringStyle = add ? 'dashed' : 'solid';
+  const ringColor = add ? '#C9C9CE' : seen ? LINE2 : ACCENT;
   const ringWidth = seen ? 2 : 1.5;
-
-  const personSil = (
-    <svg width="58%" height="58%" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="8.5" r="4" fill="#C4C4C8" />
-      <path d="M4.5 20.5a7.5 7.5 0 0 1 15 0z" fill="#C4C4C8" />
-    </svg>
-  );
-  const bizSil = (
-    <svg width="56%" height="56%" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M4 9l1.5-4h13L20 9v1.5a2.4 2.4 0 0 1-4 1.8 2.4 2.4 0 0 1-4 0 2.4 2.4 0 0 1-4 0 2.4 2.4 0 0 1-4-1.8zM5.5 12.5V20h13v-7.5"
-        stroke="#C4C4C8"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-        fill="none"
-      />
-    </svg>
-  );
+  const innerSize = size - 8;
+  const fontSize = Math.round(innerSize * 0.38);
 
   return (
-    <div
+    <View
       style={{
         width: size,
         height: size,
-        borderRadius: '50%',
+        borderRadius: size / 2,
         padding: 3,
-        border: `${ringWidth}px ${ringStyle} ${ringColor}`,
-        boxSizing: 'border-box',
-        position: 'relative',
+        borderWidth: ringWidth,
+        borderStyle: add ? 'dashed' : 'solid',
+        borderColor: ringColor,
         flexShrink: 0,
       }}
     >
-      <div
+      <View
         style={{
           width: '100%',
           height: '100%',
-          borderRadius: '50%',
-          background: '#F1F1F2',
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'center',
+          borderRadius: size / 2,
+          backgroundColor: glyph && color ? color + '30' : '#F1F1F2',
+          alignItems: 'center',
+          justifyContent: glyph && !add ? 'center' : 'flex-end',
           overflow: 'hidden',
-          position: 'relative',
         }}
       >
-        {kind === 'business' ? bizSil : personSil}
-      </div>
+        {glyph && !add ? (
+          <Text style={{ color: color || ACCENT, fontFamily: AH_BRAND_FONT, fontWeight: '800', fontSize }}>
+            {glyph}
+          </Text>
+        ) : kind === 'business' ? (
+          <Svg width="56%" height="56%" viewBox="0 0 24 24" fill="none">
+            <Path
+              d="M4 9l1.5-4h13L20 9v1.5a2.4 2.4 0 0 1-4 1.8 2.4 2.4 0 0 1-4 0 2.4 2.4 0 0 1-4 0 2.4 2.4 0 0 1-4-1.8zM5.5 12.5V20h13v-7.5"
+              stroke="#C4C4C8"
+              strokeWidth={1.7}
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </Svg>
+        ) : (
+          <Svg width="58%" height="58%" viewBox="0 0 24 24" fill="none">
+            <Circle cx={12} cy={8.5} r={4} fill="#C4C4C8" />
+            <Path d="M4.5 20.5a7.5 7.5 0 0 1 15 0z" fill="#C4C4C8" />
+          </Svg>
+        )}
+      </View>
       {add && (
-        <div
+        <View
           style={{
             position: 'absolute',
             bottom: -2,
             right: -2,
             width: 22,
             height: 22,
-            borderRadius: '50%',
-            background: '#1B1B1F',
-            color: '#fff',
-            display: 'flex',
-            alignItems: 'center',
+            borderRadius: 11,
+            backgroundColor: '#1B1B1F',
+            borderWidth: 2.5,
+            borderColor: '#fff',
             justifyContent: 'center',
-            fontSize: 14,
-            fontWeight: 600,
-            border: '2.5px solid #fff',
+            alignItems: 'center',
           }}
         >
-          +
-        </div>
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: '600',
+              lineHeight: 16,
+            }}
+          >
+            +
+          </Text>
+        </View>
       )}
-    </div>
+    </View>
   );
 }

@@ -1,5 +1,6 @@
+import { View, Text } from 'react-native';
 import { AHScreen, AHProgress, AHTitle, AHButton, AHOrb } from '../components/ui';
-import { AH_BRAND_FONT } from '../theme';
+import { AH_BRAND_FONT, INK, BG_SOFT, FAINT } from '../theme';
 import { useNav } from '../nav';
 
 // 03 · Sign in — Google / Apple, no passwords.
@@ -8,33 +9,42 @@ export function SignIn() {
   return (
     <AHScreen>
       <AHProgress step={1} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 30 }}>
+      <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }}>
+        <View style={{ alignItems: 'center', marginBottom: 30 }}>
           <AHOrb size={92} />
-        </div>
-        <AHTitle align="center" np="खाता बनाउनुहोस्" en="Create your account" sub="One tap — no passwords to remember." />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 6 }}>
+        </View>
+        <AHTitle
+          align="center"
+          np="खाता बनाउनुहोस्"
+          en="Create your account"
+          sub="One tap — no passwords to remember."
+        />
+        <View style={{ flexDirection: 'column', gap: 12, marginTop: 6 }}>
           <AHButton
             kind="outline"
             onClick={nav.next}
             icon={
-              <span
+              <View
                 style={{
                   width: 24,
                   height: 24,
-                  borderRadius: '50%',
-                  background: 'var(--ah-bg-soft)',
-                  display: 'inline-flex',
+                  borderRadius: 12,
+                  backgroundColor: BG_SOFT,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontWeight: 800,
-                  fontSize: 14,
-                  color: 'var(--ah-ink)',
-                  fontFamily: AH_BRAND_FONT,
                 }}
               >
-                G
-              </span>
+                <Text
+                  style={{
+                    fontWeight: '800',
+                    fontSize: 14,
+                    color: INK,
+                    fontFamily: AH_BRAND_FONT,
+                  }}
+                >
+                  G
+                </Text>
+              </View>
             }
           >
             Continue with Google
@@ -42,25 +52,31 @@ export function SignIn() {
           <AHButton
             kind="dark"
             onClick={nav.next}
-            icon={<span style={{ fontSize: 20, lineHeight: 1, marginTop: -2 }}></span>}
+            icon={
+              <Text style={{ fontSize: 20, lineHeight: 22, color: '#fff' }}>
+                {''}
+              </Text>
+            }
           >
             Continue with Apple
           </AHButton>
-        </div>
-      </div>
-      <div
+        </View>
+      </View>
+      <Text
         style={{
           fontSize: 12.5,
-          color: 'var(--ah-faint)',
+          color: FAINT,
           textAlign: 'center',
-          lineHeight: 1.5,
-          padding: '0 18px',
+          lineHeight: 19,
+          paddingHorizontal: 18,
         }}
       >
-        By continuing you agree to aihoni's{' '}
-        <span style={{ color: 'var(--ah-ink)', fontWeight: 600 }}>Terms</span> and{' '}
-        <span style={{ color: 'var(--ah-ink)', fontWeight: 600 }}>Privacy Policy</span>.
-      </div>
+        {'By continuing you agree to aihoni\'s '}
+        <Text style={{ color: INK, fontWeight: '600' }}>Terms</Text>
+        {' and '}
+        <Text style={{ color: INK, fontWeight: '600' }}>Privacy Policy</Text>
+        {'.'}
+      </Text>
     </AHScreen>
   );
 }

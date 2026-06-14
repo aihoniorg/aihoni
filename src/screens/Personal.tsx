@@ -1,4 +1,6 @@
+import { View, Text } from 'react-native';
 import { AHScreen, AHProgress, AHTitle, AHField, AHButton } from '../components/ui';
+import { INK, BG_SOFT, MUTED } from '../theme';
 import { useNav } from '../nav';
 
 // 04 · Personal info — kept clearly separate from business data.
@@ -12,54 +14,59 @@ export function Personal() {
         en="About you"
         sub="Just the basics. Your personal details stay private — and separate from your stores."
       />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <View style={{ flexDirection: 'column', gap: 16 }}>
         <AHField label="Full name" value="Sunita Shrestha" />
         <AHField
           label="Mobile number"
           value="+977 98XXXXXXXX"
           trailing={
-            <span
+            <View
               style={{
-                fontSize: 12.5,
-                fontWeight: 700,
-                color: 'var(--ah-ink)',
-                background: 'var(--ah-bg-soft)',
+                backgroundColor: BG_SOFT,
                 borderRadius: 99,
-                padding: '4px 10px',
+                paddingHorizontal: 10,
+                paddingVertical: 4,
               }}
             >
-              Verify
-            </span>
+              <Text
+                style={{ fontSize: 12.5, fontWeight: '700', color: INK }}
+              >
+                Verify
+              </Text>
+            </View>
           }
         />
         <AHField label="District (optional)" placeholder="e.g. Lalitpur" />
-      </div>
-      <div
+      </View>
+      <View
         style={{
           marginTop: 18,
-          display: 'flex',
+          flexDirection: 'row',
           gap: 10,
           alignItems: 'flex-start',
-          background: 'var(--ah-bg-soft)',
+          backgroundColor: BG_SOFT,
           borderRadius: 16,
-          padding: '13px 15px',
+          padding: 15,
         }}
       >
-        <div
+        <View
           style={{
             width: 8,
             height: 8,
-            borderRadius: '50%',
-            background: '#1B1B1F',
+            borderRadius: 4,
+            backgroundColor: INK,
             marginTop: 5,
             flexShrink: 0,
           }}
         />
-        <div style={{ fontSize: 13.5, lineHeight: 1.45, color: 'var(--ah-ink)' }}>
-          <strong>निजी रहन्छ।</strong> aihoni keeps personal and business information in separate spaces.
-        </div>
-      </div>
-      <div style={{ flex: 1 }} />
+        <Text
+          style={{ fontSize: 13.5, lineHeight: 20, color: INK, flex: 1 }}
+        >
+          <Text style={{ fontWeight: '700' }}>{'निजी रहन्छ।'}</Text>
+          {' aihoni keeps personal and business information in separate spaces.'}
+        </Text>
+      </View>
+      <View style={{ flex: 1 }} />
       <AHButton kind="primary" onClick={nav.next}>
         Continue
       </AHButton>

@@ -1,0 +1,18 @@
+name: PR checks
+
+on:
+  pull_request:
+    branches: ['main']
+
+jobs:
+  install_and_type_check:
+    name: Lint & type-check
+    steps:
+      - uses: eas/checkout
+      - uses: eas/install_node_modules
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+  fingerprint:
+    name: Compute fingerprint
+    type: fingerprint

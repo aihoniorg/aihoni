@@ -1,14 +1,34 @@
-import { AHScreen, AHChatInput } from '../components/ui';
+import { View, Text, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AHScreen, AHChatInput, RIPPLE, RIPPLE_ICON, pressedOpacity } from '../components/ui';
+import { INK, ACCENT, MUTED, LINE, LINE2, BG_SOFT } from '../theme';
 import { useNav } from '../nav';
+import Svg, { Path, Circle } from 'react-native-svg';
 
-// 16 · Chat · long-press reactions + reply.
+// 17 · Chat · long-press reactions + reply.
 export function ChatReact() {
   const nav = useNav();
+  const insets = useSafeAreaInsets();
+
   const dbl = (col = 'rgba(255,255,255,0.85)') => (
-    <svg width="14" height="8" viewBox="0 0 16 10" style={{ flexShrink: 0 }}>
-      <path d="M1 5l3 3.4L9.5 2" stroke={col} strokeWidth="1.7" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M7 5l3 3.4L15.5 2" stroke={col} strokeWidth="1.7" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <Svg width={14} height={8} viewBox="0 0 16 10" style={{ flexShrink: 0 }}>
+      <Path
+        d="M1 5l3 3.4L9.5 2"
+        stroke={col}
+        strokeWidth={1.7}
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M7 5l3 3.4L15.5 2"
+        stroke={col}
+        strokeWidth={1.7}
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
   );
 
   const reactions = ['❤️', '😂', '😮', '😢', '🙏', '👍'];
@@ -22,111 +42,315 @@ export function ChatReact() {
   ];
 
   return (
-    <AHScreen pad={false} style={{ background: 'var(--ah-bg)' }}>
+    <AHScreen pad={false}>
       {/* header — selection mode */}
-      <div style={{ padding: '58px 18px 12px', display: 'flex', alignItems: 'center', gap: 11, background: '#FFFFFF' }}>
-        <svg onClick={nav.back} width="22" height="22" viewBox="0 0 24 24" fill="none" style={{ cursor: 'pointer' }}>
-          <path d="M6 6l12 12M18 6L6 18" stroke="var(--ah-ink)" strokeWidth="2.2" strokeLinecap="round" />
-        </svg>
-        <div style={{ flex: 1, fontSize: 15.5, fontWeight: 800 }}>1 selected</div>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M9 14l-5-5 5-5M4 9h11a5 5 0 0 1 5 5v3" stroke="var(--ah-ink)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M15 14l5-5-5-5M20 9H9a5 5 0 0 0-5 5v3" stroke="var(--ah-ink)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <svg width="22" height="22" viewBox="0 0 24 24">
-          <circle cx="12" cy="5" r="1.7" fill="var(--ah-ink)" />
-          <circle cx="12" cy="12" r="1.7" fill="var(--ah-ink)" />
-          <circle cx="12" cy="19" r="1.7" fill="var(--ah-ink)" />
-        </svg>
-      </div>
+      <View
+        style={{
+          paddingTop: insets.top + 12,
+          paddingHorizontal: 18,
+          paddingBottom: 12,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 11,
+          backgroundColor: '#fff',
+        }}
+      >
+        <Pressable onPress={nav.back}>
+          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+            <Path
+              d="M6 6l12 12M18 6L6 18"
+              stroke={INK}
+              strokeWidth={2.2}
+              strokeLinecap="round"
+            />
+          </Svg>
+        </Pressable>
+        <Text style={{ flex: 1, fontSize: 15.5, fontWeight: '800', color: INK }}>
+          1 selected
+        </Text>
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+          <Path
+            d="M9 14l-5-5 5-5M4 9h11a5 5 0 0 1 5 5v3"
+            stroke={INK}
+            strokeWidth={1.9}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </Svg>
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+          <Path
+            d="M15 14l5-5-5-5M20 9H9a5 5 0 0 0-5 5v3"
+            stroke={INK}
+            strokeWidth={1.9}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </Svg>
+        <Svg width={22} height={22} viewBox="0 0 24 24">
+          <Circle cx={12} cy={5} r={1.7} fill={INK} />
+          <Circle cx={12} cy={12} r={1.7} fill={INK} />
+          <Circle cx={12} cy={19} r={1.7} fill={INK} />
+        </Svg>
+      </View>
 
-      {/* dim overlay + messages */}
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ padding: '14px 16px 8px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ alignSelf: 'flex-start', maxWidth: 260, background: '#fff', borderRadius: '20px 20px 20px 6px', padding: '11px 15px 8px', boxShadow: '0 2px 6px -3px rgba(20,20,25,0.18)', opacity: 0.35 }}>
-            <div style={{ fontSize: 14, lineHeight: 1.4 }}>आजको भाउ कति छ?</div>
-          </div>
+      {/* messages + overlay */}
+      <View style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        <View
+          style={{
+            padding: 14,
+            paddingHorizontal: 16,
+            paddingBottom: 8,
+            flexDirection: 'column',
+            gap: 10,
+          }}
+        >
+          <View style={{ alignSelf: 'flex-start', maxWidth: 260, opacity: 0.35 }}>
+            <View
+              style={{
+                backgroundColor: '#fff',
+                borderRadius: 20,
+                borderBottomLeftRadius: 6,
+                padding: 11,
+                paddingHorizontal: 15,
+                paddingBottom: 8,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.18,
+                shadowRadius: 6,
+              }}
+            >
+              <Text style={{ fontSize: 14, lineHeight: 20, color: INK }}>
+                {'आजको भाउ कति छ?'}
+              </Text>
+            </View>
+          </View>
 
-          <div style={{ alignSelf: 'flex-start', maxWidth: 290, opacity: 0.35, position: 'relative' }}>
-            <div style={{ background: '#fff', borderRadius: '20px 20px 20px 6px', padding: '11px 15px 9px', boxShadow: '0 2px 6px -3px rgba(20,20,25,0.18)' }}>
-              <div style={{ fontSize: 14, lineHeight: 1.45 }}>
-                आज सुनको भाउ <strong>रू 1,42,500</strong> छ। हिजोभन्दा बढी।
-              </div>
-              <div style={{ fontSize: 10.5, color: 'var(--ah-muted)', textAlign: 'right', marginTop: 3 }}>10:14</div>
-            </div>
-            <div style={{ position: 'absolute', bottom: -10, left: 12, background: '#fff', borderRadius: 99, padding: '3px 9px', display: 'flex', alignItems: 'center', gap: 4, boxShadow: '0 2px 6px -2px rgba(20,20,25,0.25)', border: '1px solid var(--ah-line)' }}>
-              <span style={{ fontSize: 13 }}>❤️</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ah-muted)' }}>2</span>
-            </div>
-          </div>
-        </div>
+          <View style={{ alignSelf: 'flex-start', maxWidth: 290, opacity: 0.35, position: 'relative' }}>
+            <View
+              style={{
+                backgroundColor: '#fff',
+                borderRadius: 20,
+                borderBottomLeftRadius: 6,
+                padding: 11,
+                paddingHorizontal: 15,
+                paddingBottom: 9,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.18,
+                shadowRadius: 6,
+              }}
+            >
+              <Text style={{ fontSize: 14, lineHeight: 21 }}>
+                {'आज सुनको भाउ '}
+                <Text style={{ fontWeight: '700' }}>{'रू 1,42,500'}</Text>
+                {' छ। हिजोभन्दा बढी।'}
+              </Text>
+              <Text
+                style={{ fontSize: 10.5, color: MUTED, textAlign: 'right', marginTop: 3 }}
+              >
+                10:14
+              </Text>
+            </View>
+            <View
+              style={{
+                position: 'absolute',
+                bottom: -10,
+                left: 12,
+                backgroundColor: '#fff',
+                borderRadius: 99,
+                paddingHorizontal: 9,
+                paddingVertical: 3,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.25,
+                shadowRadius: 6,
+                borderWidth: 1,
+                borderColor: LINE,
+              }}
+            >
+              <Text style={{ fontSize: 13 }}>❤️</Text>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: MUTED }}>2</Text>
+            </View>
+          </View>
+        </View>
 
         {/* dim wash */}
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(20,12,4,0.45)', backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)', pointerEvents: 'none' }} />
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(20,12,4,0.45)',
+          }}
+        />
 
         {/* reaction picker + selected message + action menu */}
-        <div style={{ position: 'absolute', top: 80, left: 0, right: 0, padding: '0 16px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
-          <div style={{ background: '#fff', borderRadius: 99, padding: '6px 8px', display: 'flex', gap: 4, boxShadow: '0 14px 32px -8px rgba(20,12,4,0.4)' }}>
+        <View
+          style={{
+            position: 'absolute',
+            top: 80,
+            left: 0,
+            right: 0,
+            paddingHorizontal: 16,
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: 10,
+          }}
+        >
+          {/* reaction bar */}
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 99,
+              padding: 6,
+              paddingHorizontal: 8,
+              flexDirection: 'row',
+              gap: 4,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 14 },
+              shadowOpacity: 0.4,
+              shadowRadius: 32,
+              elevation: 8,
+            }}
+          >
             {reactions.map((r) => (
-              <div
+              <Pressable
                 key={r}
-                style={{
+                android_ripple={RIPPLE_ICON}
+                style={pressedOpacity({
                   width: 38,
                   height: 38,
-                  borderRadius: '50%',
-                  display: 'flex',
+                  borderRadius: 19,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 22,
-                  background: r === '❤️' ? 'color-mix(in oklch, var(--ah-orange) 16%, white)' : 'transparent',
-                  transform: r === '❤️' ? 'scale(1.1)' : 'none',
+                  backgroundColor: r === '❤️' ? '#ECF2FE' : 'transparent',
+                  transform: r === '❤️' ? [{ scale: 1.1 }] : [],
+                })}
+              >
+                <Text style={{ fontSize: 22 }}>{r}</Text>
+              </Pressable>
+            ))}
+            <View
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 19,
+                backgroundColor: BG_SOFT,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M5 12h14M12 5v14"
+                  stroke={INK}
+                  strokeWidth={2.2}
+                  strokeLinecap="round"
+                />
+              </Svg>
+            </View>
+          </View>
+
+          {/* selected message */}
+          <View style={{ maxWidth: 290 }}>
+            <View
+              style={{
+                backgroundColor: INK,
+                borderRadius: 20,
+                borderBottomRightRadius: 6,
+                padding: 11,
+                paddingHorizontal: 14,
+                paddingBottom: 9,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 22 },
+                shadowOpacity: 0.55,
+                shadowRadius: 40,
+                elevation: 10,
+              }}
+            >
+              <Text style={{ fontSize: 14.5, lineHeight: 20, color: '#fff' }}>
+                {'राम्रो! एक केजी राख्नुहोला।'}
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                  gap: 5,
+                  marginTop: 4,
+                  alignItems: 'center',
                 }}
               >
-                {r}
-              </div>
-            ))}
-            <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--ah-bg-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M5 12h14M12 5v14" stroke="var(--ah-ink)" strokeWidth="2.2" strokeLinecap="round" />
-              </svg>
-            </div>
-          </div>
-
-          <div style={{ maxWidth: 290 }}>
-            <div style={{ background: '#1B1B1F', color: '#fff', borderRadius: '20px 20px 6px 20px', padding: '11px 14px 9px', boxShadow: '0 22px 40px -16px rgba(20,12,4,0.55)' }}>
-              <div style={{ fontSize: 14.5, lineHeight: 1.4 }}>राम्रो! एक केजी राख्नुहोला।</div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 5, marginTop: 4, alignItems: 'center' }}>
-                <span style={{ fontSize: 10.5, opacity: 0.85 }}>10:15</span>
+                <Text style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.85)' }}>
+                  10:15
+                </Text>
                 {dbl()}
-              </div>
-            </div>
-          </div>
+              </View>
+            </View>
+          </View>
 
-          <div style={{ background: '#fff', borderRadius: 18, padding: 6, boxShadow: '0 14px 32px -10px rgba(20,12,4,0.4)', minWidth: 220 }}>
+          {/* action menu */}
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 18,
+              padding: 6,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 14 },
+              shadowOpacity: 0.4,
+              shadowRadius: 32,
+              elevation: 8,
+              minWidth: 220,
+            }}
+          >
             {actions.map((a, i) => (
-              <div
+              <Pressable
                 key={a.id}
-                style={{
-                  display: 'flex',
+                android_ripple={RIPPLE}
+                style={pressedOpacity({
+                  flexDirection: 'row',
                   alignItems: 'center',
                   gap: 12,
-                  padding: '10px 12px',
-                  borderTop: i ? '1px solid var(--ah-line)' : 'none',
-                  color: a.id === 'delete' ? '#D14836' : 'var(--ah-ink)',
-                }}
+                  padding: 10,
+                  paddingHorizontal: 12,
+                  borderTopWidth: i ? 1 : 0,
+                  borderTopColor: LINE,
+                })}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d={a.d} stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span style={{ flex: 1, fontSize: 14.5, fontWeight: 600 }}>{a.label}</span>
-                {a.id === 'reply' && <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ah-muted)' }}>← swipe</span>}
-              </div>
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d={a.d}
+                    stroke={a.id === 'delete' ? '#D14836' : INK}
+                    strokeWidth={1.9}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+                <Text
+                  style={{
+                    flex: 1,
+                    fontSize: 14.5,
+                    fontWeight: '600',
+                    color: a.id === 'delete' ? '#D14836' : INK,
+                  }}
+                >
+                  {a.label}
+                </Text>
+                {a.id === 'reply' && (
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: MUTED }}>
+                    {'← swipe'}
+                  </Text>
+                )}
+              </Pressable>
             ))}
-          </div>
-        </div>
-      </div>
+          </View>
+        </View>
+      </View>
 
       <AHChatInput placeholder="Type a reply…" reply={true} />
     </AHScreen>

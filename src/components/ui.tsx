@@ -1,8 +1,40 @@
-import type { CSSProperties, ReactNode } from 'react';
-import { AH_BRAND_FONT, AH_FONT } from '../theme';
+import { ReactNode } from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Platform,
+  type PressableStateCallbackType,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import {
+  ACCENT,
+  INK,
+  MUTED,
+  FAINT,
+  LINE,
+  LINE2,
+  BG_SOFT,
+  BG,
+  ACCENT_SOFT,
+  AH_FONT,
+  AH_BRAND_FONT,
+} from '../theme';
 import { useNav, type ScreenId } from '../nav';
 
-// ── Screen shell: padding under the status bar, flex column ──
+// Shared Android ripple config — subtle dark ripple, borderless when used on icons.
+export const RIPPLE = { color: 'rgba(0,0,0,0.10)', borderless: false } as const;
+export const RIPPLE_LIGHT = { color: 'rgba(255,255,255,0.18)', borderless: false } as const;
+export const RIPPLE_ICON = { color: 'rgba(0,0,0,0.12)', borderless: true, radius: 22 } as const;
+
+// Pressed-opacity for iOS (Android gets ripple). Use as a style function.
+export const pressedOpacity =
+  (base: object = {}, opacity = 0.65) =>
+  ({ pressed }: PressableStateCallbackType) =>
+    [base, pressed && Platform.OS === 'ios' ? { opacity } : null];
+
 export function AHScreen({
   children,
   pad = true,
@@ -10,49 +42,147 @@ export function AHScreen({
 }: {
   children: ReactNode;
   pad?: boolean;
-  style?: CSSProperties;
+  style?: object;
 }) {
+  const insets = useSafeAreaInsets();
   return (
-    <div
-      style={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        boxSizing: 'border-box',
-        padding: pad ? '52px 20px 20px' : 0,
-        fontFamily: AH_FONT,
-        color: 'var(--ah-ink)',
-        background: 'var(--ah-bg)',
-        ...style,
-      }}
+    <View
+      style={[
+        styles.screen,
+        pad && {
+          paddingTop: insets.top + 12,
+          paddingHorizontal: 20,
+          paddingBottom: Math.max(insets.bottom, 20),
+        },
+        style,
+      ]}
     >
       {children}
-    </div>
+    </View>
   );
 }
 
-// ── Progress dots ──
-export function AHProgress({ step, total = 9 }: { step: number; total?: number }) {
+export function AHHeader({
+  title,
+  subtitle,
+  back,
+  right,
+  bg = '#fff',
+  large = false,
+}: {
+  title?: string | ReactNode;
+  subtitle?: string;
+  back?: boolean;
+  right?: ReactNode;
+  bg?: string;
+  large?: boolean;
+}) {
+  const nav = useNav();
+  const insets = useSafeAreaInsets();
   return (
-    <div style={{ display: 'flex', gap: 5, justifyContent: 'center', marginBottom: 12 }}>
+    <View
+      style={{
+        paddingTop: insets.top + 10,
+        paddingHorizontal: 18,
+        paddingBottom: 10,
+        backgroundColor: bg,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+      }}
+    >
+      {back && (
+        <Pressable
+          onPress={nav.back}
+          hitSlop={10}
+          android_ripple={RIPPLE_ICON}
+          style={pressedOpacity({
+            width: 36,
+            height: 36,
+            marginLeft: -8,
+            borderRadius: 18,
+            alignItems: 'center',
+            justifyContent: 'center',
+          })}
+        >
+          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+            <Path
+              d="M14 6l-6 6 6 6"
+              stroke={INK}
+              strokeWidth={2.2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        </Pressable>
+      )}
+      <View style={{ flex: 1 }}>
+        {typeof title === 'string' ? (
+          <Text
+            style={{
+              fontSize: large ? 26 : 17,
+              fontWeight: large ? '800' : '700',
+              letterSpacing: large ? -0.5 : -0.2,
+              color: INK,
+            }}
+            numberOfLines={1}
+          >
+            {title}
+          </Text>
+        ) : (
+          title
+        )}
+        {subtitle ? (
+          <Text style={{ fontSize: 11.5, color: MUTED, marginTop: 1 }}>
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+      {right ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          {right}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+export function AHProgress({
+  step,
+  total = 5,
+}: {
+  step: number;
+  total?: number;
+}) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        gap: 5,
+        justifyContent: 'center',
+        marginBottom: 12,
+      }}
+    >
       {Array.from({ length: total }).map((_, i) => (
-        <div
+        <View
           key={i}
           style={{
             height: 6,
             borderRadius: 99,
             width: i === step ? 22 : 6,
-            background:
-              i === step ? '#1B1B1F' : i < step ? 'rgba(27,27,31,0.45)' : 'var(--ah-line2)',
-            transition: 'all .2s',
+            backgroundColor:
+              i === step
+                ? INK
+                : i < step
+                  ? 'rgba(27,27,31,0.45)'
+                  : LINE2,
           }}
         />
       ))}
-    </div>
+    </View>
   );
 }
 
-// ── Headline + sub ──
 export function AHTitle({
   np,
   en,
@@ -65,501 +195,590 @@ export function AHTitle({
   align?: 'left' | 'center';
 }) {
   return (
-    <div style={{ textAlign: align, marginBottom: 12 }}>
+    <View style={{ marginBottom: 12 }}>
       {np && (
-        <div
+        <Text
           style={{
             fontFamily: AH_FONT,
             fontSize: 14,
-            fontWeight: 600,
-            color: 'var(--ah-ink)',
+            fontWeight: '600',
+            color: INK,
             marginBottom: 3,
-            letterSpacing: 0.2,
+            textAlign: align,
           }}
         >
           {np}
-        </div>
+        </Text>
       )}
-      <div style={{ fontSize: 25, fontWeight: 700, letterSpacing: -0.5, lineHeight: 1.15 }}>{en}</div>
+      <Text
+        style={{
+          fontSize: 25,
+          fontWeight: '700',
+          letterSpacing: -0.5,
+          lineHeight: 29,
+          color: INK,
+          textAlign: align,
+        }}
+      >
+        {en}
+      </Text>
       {sub && (
-        <div style={{ fontSize: 14, lineHeight: 1.4, color: 'var(--ah-muted)', marginTop: 6 }}>
+        <Text
+          style={{
+            fontSize: 14,
+            lineHeight: 20,
+            color: MUTED,
+            marginTop: 6,
+            textAlign: align,
+          }}
+        >
           {sub}
-        </div>
+        </Text>
       )}
-    </div>
+    </View>
   );
 }
 
 type ButtonKind = 'primary' | 'orange' | 'outline' | 'dark' | 'ghost';
 
-// ── Buttons ──
 export function AHButton({
   children,
   kind = 'primary',
   icon,
   style = {},
   onClick,
+  disabled,
 }: {
   children: ReactNode;
   kind?: ButtonKind;
   icon?: ReactNode;
-  style?: CSSProperties;
+  style?: object;
   onClick?: () => void;
+  disabled?: boolean;
 }) {
-  const base: CSSProperties = {
-    minHeight: 48,
-    borderRadius: 'var(--ah-btn-radius)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 9,
-    fontSize: 15.5,
-    fontWeight: 600,
-    fontFamily: AH_FONT,
-    cursor: 'pointer',
-    boxSizing: 'border-box',
-    padding: '0 18px',
-    userSelect: 'none',
+  const kindStyles: Record<ButtonKind, object> = {
+    primary: { backgroundColor: INK },
+    orange: { backgroundColor: INK },
+    outline: { backgroundColor: '#fff', borderWidth: 1.5, borderColor: LINE2 },
+    dark: { backgroundColor: INK },
+    ghost: { backgroundColor: 'transparent' },
   };
-  const kinds: Record<ButtonKind, CSSProperties> = {
-    primary: { background: '#1B1B1F', color: '#fff' },
-    orange: { background: '#1B1B1F', color: '#fff' },
-    outline: { background: '#fff', color: 'var(--ah-ink)', border: '1.5px solid var(--ah-line2)' },
-    dark: { background: '#1B1B1F', color: '#fff' },
-    ghost: { background: 'transparent', color: 'var(--ah-muted)', minHeight: 40, fontWeight: 500 },
+  const textColors: Record<ButtonKind, string> = {
+    primary: '#fff',
+    orange: '#fff',
+    outline: INK,
+    dark: '#fff',
+    ghost: MUTED,
   };
+  const isGhost = kind === 'ghost';
+  const isLight = kind === 'outline' || kind === 'ghost';
   return (
-    <div onClick={onClick} style={{ ...base, ...kinds[kind], ...style }}>
-      {icon}
-      {children}
-    </div>
+    <Pressable
+      onPress={onClick}
+      disabled={disabled}
+      android_ripple={isLight ? RIPPLE : RIPPLE_LIGHT}
+      style={({ pressed }) => [
+        styles.button,
+        kindStyles[kind],
+        isGhost && { minHeight: 40 },
+        style,
+        disabled && { opacity: 0.45 },
+        pressed && Platform.OS === 'ios' ? { opacity: isLight ? 0.55 : 0.82, transform: [{ scale: 0.985 }] } : null,
+      ]}
+    >
+      {icon && <View style={{ marginRight: 6 }}>{icon}</View>}
+      <Text
+        style={{
+          fontSize: 15.5,
+          fontWeight: '600',
+          fontFamily: AH_FONT,
+          color: textColors[kind],
+        }}
+      >
+        {children}
+      </Text>
+    </Pressable>
   );
 }
 
-// ── Text field (static mock) ──
 export function AHField({
   label,
   value,
   placeholder,
   trailing,
+  onPress,
 }: {
   label: string;
   value?: string;
   placeholder?: string;
   trailing?: ReactNode;
+  onPress?: () => void;
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ah-muted)' }}>{label}</div>
-      <div
-        style={{
-          minHeight: 46,
-          borderRadius: 14,
-          background: '#fff',
-          border: value ? '1.5px solid #1B1B1F' : '1.5px solid var(--ah-line2)',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 15px',
-          gap: 10,
-          fontSize: 15.5,
-          color: value ? 'var(--ah-ink)' : 'var(--ah-faint)',
-        }}
+    <View style={{ gap: 6 }}>
+      <Text style={{ fontSize: 13, fontWeight: '600', color: MUTED }}>
+        {label}
+      </Text>
+      <Pressable
+        onPress={onPress}
+        android_ripple={RIPPLE}
+        style={({ pressed }) => [
+          {
+            minHeight: 46,
+            borderRadius: 14,
+            backgroundColor: '#fff',
+            borderWidth: 1.5,
+            borderColor: pressed ? ACCENT : value ? INK : LINE2,
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 15,
+            gap: 10,
+          },
+          pressed && Platform.OS === 'ios' ? { backgroundColor: BG_SOFT } : null,
+        ]}
       >
-        <span style={{ flex: 1 }}>{value || placeholder}</span>
+        <Text
+          style={{ flex: 1, fontSize: 15.5, color: value ? INK : FAINT }}
+        >
+          {value || placeholder}
+        </Text>
         {trailing}
-      </div>
-    </div>
+      </Pressable>
+    </View>
   );
 }
 
-// ── Voice orb — dark charcoal sphere with an accent ember ──
-export function AHOrb({ size = 150, mic = true }: { size?: number; mic?: boolean }) {
+export function AHOrb({
+  size = 150,
+  mic = true,
+}: {
+  size?: number;
+  mic?: boolean;
+}) {
+  const emberSize = size * 0.28;
   return (
-    <div
+    <View
       style={{
         width: size,
         height: size,
-        borderRadius: '50%',
-        position: 'relative',
-        background: 'radial-gradient(circle at 34% 26%, #43434B 0%, #232328 52%, #131316 100%)',
-        boxShadow:
-          '0 18px 44px -14px rgba(20,12,4,0.5), inset 0 -8px 24px rgba(0,0,0,0.28), inset 0 2px 3px rgba(255,255,255,0.08)',
-        display: 'flex',
-        alignItems: 'center',
+        borderRadius: size / 2,
+        backgroundColor: '#232328',
         justifyContent: 'center',
-        flexShrink: 0,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.35,
+        shadowRadius: 18,
+        elevation: 10,
       }}
     >
-      {/* accent ember */}
-      <div
+      <View
         style={{
           position: 'absolute',
-          right: '15%',
-          bottom: '17%',
-          width: size * 0.28,
-          height: size * 0.28,
-          borderRadius: '50%',
-          background:
-            'radial-gradient(circle at 35% 32%, color-mix(in oklch, var(--ah-orange) 55%, white), var(--ah-orange))',
-          boxShadow:
-            '0 0 22px color-mix(in oklch, var(--ah-orange) 75%, transparent), 0 0 0 4px color-mix(in oklch, var(--ah-orange) 18%, transparent)',
+          right: size * 0.12,
+          bottom: size * 0.14,
+          width: emberSize,
+          height: emberSize,
+          borderRadius: emberSize / 2,
+          backgroundColor: ACCENT,
+          shadowColor: ACCENT,
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.75,
+          shadowRadius: 10,
         }}
       />
       {mic && (
-        <svg width={size * 0.3} height={size * 0.3} viewBox="0 0 24 24" fill="none">
-          <rect x="9" y="3" width="6" height="11" rx="3" fill="#fff" />
-          <path d="M6 11.5a6 6 0 0 0 12 0" stroke="#fff" strokeWidth="2" strokeLinecap="round" fill="none" />
-          <path d="M12 17.5V21" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+        <Svg
+          width={size * 0.3}
+          height={size * 0.3}
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <Rect x="9" y="3" width="6" height="11" rx="3" fill="#fff" />
+          <Path
+            d="M6 11.5a6 6 0 0 0 12 0"
+            stroke="#fff"
+            strokeWidth={2}
+            strokeLinecap="round"
+            fill="none"
+          />
+          <Path
+            d="M12 17.5V21"
+            stroke="#fff"
+            strokeWidth={2}
+            strokeLinecap="round"
+          />
+        </Svg>
       )}
-    </div>
+    </View>
   );
 }
 
-// ── Sound wave bars ──
-export function AHWave({ color = 'var(--ah-orange)', n = 14 }: { color?: string; n?: number }) {
+export function AHWave({
+  color = ACCENT,
+  n = 14,
+}: {
+  color?: string;
+  n?: number;
+}) {
   const hs = [10, 18, 26, 16, 34, 22, 40, 28, 38, 18, 26, 14, 20, 10];
   return (
-    <div style={{ display: 'flex', gap: 5, alignItems: 'center', height: 44, justifyContent: 'center' }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        gap: 5,
+        alignItems: 'center',
+        height: 44,
+        justifyContent: 'center',
+      }}
+    >
       {hs.slice(0, n).map((h, i) => (
-        <div
+        <View
           key={i}
-          style={{ width: 4.5, height: h, borderRadius: 99, background: color, opacity: 0.4 + h / 60 }}
+          style={{
+            width: 4.5,
+            height: h,
+            borderRadius: 99,
+            backgroundColor: color,
+            opacity: 0.4 + h / 60,
+          }}
         />
       ))}
-    </div>
+    </View>
   );
 }
 
-// ── Selectable option card ──
 export function AHOptionCard({
   title,
   sub,
   selected,
   glyph,
   badge,
+  onPress,
 }: {
   title: string;
   sub?: string;
   selected?: boolean;
   glyph?: string;
   badge?: string;
+  onPress?: () => void;
 }) {
   return (
-    <div
-      style={{
-        borderRadius: 18,
-        padding: '14px 16px',
-        background: selected ? 'var(--ah-bg-soft)' : '#fff',
-        border: selected ? '2px solid #1B1B1F' : '2px solid var(--ah-line2)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        position: 'relative',
-      }}
+    <Pressable
+      onPress={onPress}
+      android_ripple={RIPPLE}
+      style={({ pressed }) => [
+        {
+          borderRadius: 18,
+          padding: 14,
+          paddingHorizontal: 16,
+          backgroundColor: selected ? BG_SOFT : '#fff',
+          borderWidth: 2,
+          borderColor: selected ? INK : LINE2,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 14,
+        },
+        pressed && Platform.OS === 'ios' ? { opacity: 0.75 } : null,
+      ]}
     >
       {glyph && (
-        <div
+        <View
           style={{
             width: 42,
             height: 42,
             borderRadius: 13,
             flexShrink: 0,
-            background: selected ? '#1B1B1F' : 'var(--ah-bg-soft)',
-            display: 'flex',
-            alignItems: 'center',
+            backgroundColor: selected ? INK : BG_SOFT,
             justifyContent: 'center',
-            fontSize: 21,
-            color: selected ? '#fff' : 'var(--ah-muted)',
-            fontFamily: AH_BRAND_FONT,
-            fontWeight: 700,
+            alignItems: 'center',
           }}
         >
-          {glyph}
-        </div>
+          <Text
+            style={{
+              fontSize: 21,
+              color: selected ? '#fff' : MUTED,
+              fontFamily: AH_BRAND_FONT,
+            }}
+          >
+            {glyph}
+          </Text>
+        </View>
       )}
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-          {title}
+      <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Text style={{ fontSize: 16, fontWeight: '700', color: INK }}>
+            {title}
+          </Text>
           {badge && (
-            <span
+            <View
               style={{
-                fontSize: 10.5,
-                fontWeight: 700,
-                color: 'var(--ah-orange)',
-                background: 'var(--ah-orange-soft)',
+                backgroundColor: ACCENT_SOFT,
                 borderRadius: 99,
-                padding: '3px 9px',
+                paddingHorizontal: 9,
+                paddingVertical: 3,
               }}
             >
-              {badge}
-            </span>
+              <Text
+                style={{ fontSize: 10.5, fontWeight: '700', color: ACCENT }}
+              >
+                {badge}
+              </Text>
+            </View>
           )}
-        </div>
+        </View>
         {sub && (
-          <div style={{ fontSize: 12.5, color: 'var(--ah-muted)', marginTop: 2, lineHeight: 1.35 }}>
+          <Text
+            style={{
+              fontSize: 12.5,
+              color: MUTED,
+              marginTop: 2,
+              lineHeight: 17,
+            }}
+          >
             {sub}
-          </div>
+          </Text>
         )}
-      </div>
-      <div
+      </View>
+      <View
         style={{
           width: 24,
           height: 24,
-          borderRadius: '50%',
+          borderRadius: 12,
           flexShrink: 0,
-          border: selected ? 'none' : '2px solid var(--ah-line2)',
-          background: selected ? '#1B1B1F' : 'transparent',
-          display: 'flex',
-          alignItems: 'center',
+          borderWidth: selected ? 0 : 2,
+          borderColor: LINE2,
+          backgroundColor: selected ? INK : 'transparent',
           justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         {selected && (
-          <svg width="12" height="10" viewBox="0 0 12 10">
-            <path
+          <Svg width={12} height={10} viewBox="0 0 12 10">
+            <Path
               d="M1 5l3.2 3.4L11 1"
               stroke="#fff"
-              strokeWidth="2.4"
+              strokeWidth={2.4}
               fill="none"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-          </svg>
+          </Svg>
         )}
-      </div>
-    </div>
+      </View>
+    </Pressable>
   );
 }
 
-// ── Small chip ──
 export function AHChip({
   children,
   selected,
   color,
+  onPress,
 }: {
   children: ReactNode;
   selected?: boolean;
   color?: string;
+  onPress?: () => void;
 }) {
   return (
-    <div
-      style={{
-        padding: '8px 14px',
-        borderRadius: 99,
-        fontSize: 13.5,
-        fontWeight: 600,
-        background: selected ? '#1B1B1F' : '#fff',
-        color: selected ? '#fff' : color || 'var(--ah-ink)',
-        border: selected ? '1.5px solid #1B1B1F' : '1.5px solid var(--ah-line2)',
-        whiteSpace: 'nowrap',
-      }}
+    <Pressable
+      onPress={onPress}
+      android_ripple={RIPPLE}
+      style={({ pressed }) => [
+        {
+          paddingHorizontal: 14,
+          paddingVertical: 8,
+          borderRadius: 99,
+          backgroundColor: selected ? INK : '#fff',
+          borderWidth: 1.5,
+          borderColor: selected ? INK : LINE2,
+        },
+        pressed && Platform.OS === 'ios' ? { opacity: 0.7 } : null,
+      ]}
     >
-      {children}
-    </div>
+      <Text
+        style={{
+          fontSize: 13.5,
+          fontWeight: '600',
+          color: selected ? '#fff' : color || INK,
+        }}
+      >
+        {children}
+      </Text>
+    </Pressable>
   );
 }
 
-// ── Brand wordmark ──
-export function AHWordmark({ size = 34, light = false }: { size?: number; light?: boolean }) {
+export function AHWordmark({
+  size = 34,
+  light = false,
+}: {
+  size?: number;
+  light?: boolean;
+}) {
   return (
-    <div
+    <Text
       style={{
         fontFamily: AH_BRAND_FONT,
-        fontWeight: 700,
+        fontWeight: '700',
         fontSize: size,
         letterSpacing: -0.5,
-        color: light ? '#fff' : 'var(--ah-ink)',
-        lineHeight: 1,
+        color: light ? '#fff' : INK,
       }}
     >
-      aihoni<span style={{ color: 'var(--ah-orange)' }}>.</span>
-    </div>
+      {'aihoni'}
+      <Text style={{ color: ACCENT }}>{'.'}</Text>
+    </Text>
   );
 }
 
-// ── Little points coin ──
 export function AHCoin({ size = 22 }: { size?: number }) {
   return (
-    <span
+    <View
       style={{
         width: size,
         height: size,
-        borderRadius: '50%',
+        borderRadius: size / 2,
         flexShrink: 0,
-        background:
-          'linear-gradient(145deg, color-mix(in oklch, var(--ah-orange) 50%, white), var(--ah-orange))',
-        boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.18), inset 0 2px 3px rgba(255,255,255,0.5)',
-        display: 'inline-flex',
-        alignItems: 'center',
+        backgroundColor: ACCENT,
         justifyContent: 'center',
-        fontFamily: AH_BRAND_FONT,
-        fontWeight: 800,
-        color: '#fff',
-        fontSize: size * 0.52,
+        alignItems: 'center',
       }}
     >
-      P
-    </span>
+      <Text
+        style={{
+          fontFamily: AH_BRAND_FONT,
+          fontWeight: '800',
+          color: '#fff',
+          fontSize: size * 0.52,
+        }}
+      >
+        P
+      </Text>
+    </View>
   );
 }
 
-// ── Smooth rounded tab icons ──
-export function AHTabIcon({ id, on }: { id: string; on: boolean }) {
+export function AHTabIcon({ id, on, size = 26 }: { id: string; on: boolean; size?: number }) {
+  // Snapchat-style: all icons outline-only, accent color when active, ink when idle.
+  const color = on ? ACCENT : INK;
+  const sw = on ? 2.1 : 1.9;
   const stroke = {
-    stroke: 'currentColor',
-    strokeWidth: 1.9,
+    stroke: color,
+    strokeWidth: sw,
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
-    fill: 'none',
+    fill: 'none' as const,
   };
-  const fill = { fill: 'currentColor' };
   switch (id) {
     case 'chat':
-      return on ? (
-        <svg width="24" height="24" viewBox="0 0 24 24">
-          <path
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24">
+          <Path
             d="M12 3.5c5 0 8.5 3.2 8.5 7.4 0 4.2-3.5 7.4-8.5 7.4-.9 0-1.8-.1-2.6-.3l-3.8 1.9c-.6.3-1.2-.3-1-.9l1-3A6.9 6.9 0 0 1 3.5 11C3.5 6.7 7 3.5 12 3.5z"
-            {...fill}
-          />
-        </svg>
-      ) : (
-        <svg width="24" height="24" viewBox="0 0 24 24">
-          <path
-            d="M12 3.8c5 0 8.2 3.1 8.2 7.1s-3.2 7.1-8.2 7.1c-.9 0-1.8-.1-2.6-.3l-3.6 1.7 1-3A6.7 6.7 0 0 1 3.8 11C3.8 6.9 7 3.8 12 3.8z"
             {...stroke}
           />
-        </svg>
+        </Svg>
+      );
+    case 'camera':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24">
+          <Path
+            d="M4 8.5A2.5 2.5 0 0 1 6.5 6h.9l.7-1.3A1.4 1.4 0 0 1 9.3 4h5.4a1.4 1.4 0 0 1 1.2.7L16.6 6h.9A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z"
+            {...stroke}
+          />
+          <Circle cx={12} cy={12.2} r={3.3} {...stroke} />
+        </Svg>
       );
     case 'reels':
-      return on ? (
-        <svg width="24" height="24" viewBox="0 0 24 24">
-          <rect x="3" y="3" width="18" height="18" rx="6" {...fill} />
-          <path d="M10.2 8.7c-.5-.3-1.2 0-1.2.6v5.4c0 .6.7 1 1.2.6l4.3-2.7c.5-.3.5-1 0-1.3z" fill="#fff" />
-        </svg>
-      ) : (
-        <svg width="24" height="24" viewBox="0 0 24 24">
-          <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="6" {...stroke} />
-          <path d="M10.3 9.2c-.4-.2-.9 0-.9.5v4.6c0 .5.5.7.9.5l3.7-2.3c.4-.2.4-.8 0-1z" {...fill} />
-        </svg>
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24">
+          <Rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5.5" {...stroke} />
+          <Path
+            d="M10.3 9.2c-.4-.2-.9 0-.9.5v4.6c0 .5.5.7.9.5l3.7-2.3c.4-.2.4-.8 0-1z"
+            {...stroke}
+            fill={on ? color : 'none'}
+          />
+        </Svg>
       );
     case 'feed':
-      return on ? (
-        <svg width="24" height="24" viewBox="0 0 24 24">
-          <rect x="3" y="7" width="18" height="14" rx="3.5" {...fill} />
-          <rect x="6" y="3.5" width="12" height="2.4" rx="1.2" fill="currentColor" opacity="0.45" />
-        </svg>
-      ) : (
-        <svg width="24" height="24" viewBox="0 0 24 24">
-          <rect x="3.5" y="7" width="17" height="13.5" rx="3.5" {...stroke} />
-          <path d="M7 4h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-        </svg>
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24">
+          <Rect x="3.5" y="7" width="17" height="13.5" rx="3.5" {...stroke} />
+          <Path d="M7 4h10" stroke={color} strokeWidth={sw} strokeLinecap="round" opacity={0.65} />
+        </Svg>
       );
-    case 'profile':
-    default:
-      return on ? (
-        <svg width="24" height="24" viewBox="0 0 24 24">
-          <circle cx="12" cy="8" r="4" {...fill} />
-          <path d="M4.5 20a7.5 7.5 0 0 1 15 0 1.2 1.2 0 0 1-1.2 1.2H5.7A1.2 1.2 0 0 1 4.5 20z" {...fill} />
-        </svg>
-      ) : (
-        <svg width="24" height="24" viewBox="0 0 24 24">
-          <circle cx="12" cy="8" r="3.6" {...stroke} />
-          <path d="M5.2 19.5a6.8 6.8 0 0 1 13.6 0" {...stroke} />
-        </svg>
+    default: // profile
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24">
+          <Circle cx={12} cy={8} r={3.6} {...stroke} />
+          <Path d="M5.2 19.5a6.8 6.8 0 0 1 13.6 0" {...stroke} />
+        </Svg>
       );
   }
 }
 
-// ── Refined tab bar — flat bottom nav + floating center camera ──
 export function AHTabBar({ active = 'chat' }: { active?: string }) {
   const nav = useNav();
-  const tabs: Array<[string, string, ScreenId]> = [
-    ['chat', 'Chat', 'chats'],
-    ['feed', 'Feed', 'feed'],
-    ['camera', '', 'snap'],
-    ['reels', 'Reels', 'reels'],
-    ['profile', 'Profile', 'profile'],
+  const insets = useSafeAreaInsets();
+  const tabs: Array<[string, ScreenId]> = [
+    ['chat', 'chats'],
+    ['feed', 'feed'],
+    ['camera', 'snap'],
+    ['reels', 'reels'],
+    ['profile', 'profile'],
   ];
   return (
-    <div
+    <View
       style={{
-        position: 'relative',
-        paddingBottom: 24,
-        background: '#fff',
-        borderTop: '1px solid var(--ah-line)',
+        paddingBottom: Math.max(insets.bottom, 10),
+        paddingTop: 6,
+        paddingHorizontal: 10,
+        backgroundColor: '#fff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+        elevation: 8,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-        {tabs.map(([id, label, target]) => {
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
+        {tabs.map(([id, target]) => {
           const on = id === active;
-          const isCenter = id === 'camera';
-          if (isCenter) {
-            return (
-              <div
-                key={id}
-                onClick={() => nav.go(target)}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'flex-start',
-                  cursor: 'pointer',
-                }}
-              >
-                <div
-                  style={{
-                    marginTop: -18,
-                    width: 54,
-                    height: 54,
-                    borderRadius: '50%',
-                    background: '#1B1B1F',
-                    border: '3px solid #fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 8px 20px -6px rgba(20,20,25,0.38)',
-                  }}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M4 8.5A2.5 2.5 0 0 1 6.5 6h.9l.7-1.3A1.4 1.4 0 0 1 9.3 4h5.4a1.4 1.4 0 0 1 1.2.7L16.6 6h.9A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z"
-                      stroke="#fff"
-                      strokeWidth="1.9"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="12" cy="12.2" r="3.3" stroke="#fff" strokeWidth="1.9" />
-                  </svg>
-                </div>
-              </div>
-            );
-          }
           return (
-            <div
+            <Pressable
               key={id}
-              onClick={() => nav.go(target)}
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 3,
-                paddingTop: 10,
-                cursor: 'pointer',
-                color: on ? 'var(--ah-orange)' : 'var(--ah-faint)',
-              }}
+              onPress={() => nav.go(target)}
+              android_ripple={{ color: 'rgba(0,0,0,0.08)', borderless: true, radius: 28 }}
+              style={({ pressed }) => [
+                {
+                  flex: 1,
+                  alignItems: 'center',
+                  paddingTop: 8,
+                  paddingBottom: 8,
+                  gap: 4,
+                },
+                pressed && Platform.OS === 'ios' ? { opacity: 0.55, transform: [{ scale: 0.92 }] } : null,
+              ]}
             >
-              <AHTabIcon id={id} on={on} />
-              <span style={{ fontSize: 10.5, fontWeight: on ? 700 : 500, letterSpacing: 0.1 }}>{label}</span>
-            </div>
+              <AHTabIcon id={id} on={on} size={26} />
+              <View
+                style={{
+                  width: 18,
+                  height: 3,
+                  borderRadius: 2,
+                  backgroundColor: on ? ACCENT : 'transparent',
+                }}
+              />
+            </Pressable>
           );
         })}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
 
-// ── Shared chat input (soft-circle clip · emoji · mic) ──
 export function AHChatInput({
   placeholder = 'Type a message',
   reply = false,
@@ -568,29 +787,33 @@ export function AHChatInput({
   reply?: boolean;
 }) {
   return (
-    <div
+    <View
       style={{
-        background: 'var(--ah-bg-solid)',
-        padding: reply ? '6px 14px 22px' : '8px 14px 22px',
-        display: 'flex',
-        flexDirection: 'column',
+        backgroundColor: '#fff',
+        paddingHorizontal: 14,
+        paddingBottom: 22,
+        paddingTop: reply ? 6 : 8,
         gap: 7,
       }}
     >
       {reply && (
-        <div
+        <View
           style={{
-            position: 'relative',
-            background: '#fff',
+            backgroundColor: '#fff',
             borderRadius: 14,
-            padding: '9px 12px 9px 18px',
-            display: 'flex',
+            padding: 9,
+            paddingLeft: 18,
+            flexDirection: 'row',
             alignItems: 'flex-start',
             gap: 10,
-            boxShadow: '0 2px 8px -4px rgba(20,20,25,0.15)',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 6,
+            elevation: 2,
           }}
         >
-          <div
+          <View
             style={{
               position: 'absolute',
               left: 7,
@@ -598,97 +821,137 @@ export function AHChatInput({
               bottom: 9,
               width: 4,
               borderRadius: 99,
-              background: 'var(--ah-orange)',
+              backgroundColor: ACCENT,
             }}
           />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--ah-orange)' }}>Replying to Sunita</div>
-            <div
-              style={{
-                fontSize: 12.5,
-                color: 'var(--ah-muted)',
-                marginTop: 1,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 12, fontWeight: '800', color: ACCENT }}>
+              Replying to Sunita
+            </Text>
+            <Text
+              style={{ fontSize: 12.5, color: MUTED, marginTop: 1 }}
+              numberOfLines={1}
             >
-              राम्रो! एक केजी राख्नुहोला।
-            </div>
-          </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M6 6l12 12M18 6L6 18" stroke="var(--ah-muted)" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </div>
+              {'राम्रो! एक केजी राख्नुहोला।'}
+            </Text>
+          </View>
+          <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+            <Path
+              d="M6 6l12 12M18 6L6 18"
+              stroke={MUTED}
+              strokeWidth={2}
+              strokeLinecap="round"
+            />
+          </Svg>
+        </View>
       )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 9,
-            background: '#fff',
-            borderRadius: 99,
-            padding: '7px 9px',
-            boxShadow: '0 3px 12px -6px rgba(20,20,25,0.2)',
-          }}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <Pressable
+          android_ripple={RIPPLE}
+          style={pressedOpacity(
+            {
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 9,
+              backgroundColor: '#fff',
+              borderRadius: 99,
+              paddingHorizontal: 9,
+              paddingVertical: 7,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 8,
+              elevation: 3,
+            },
+            0.75,
+          )}
         >
-          <div
-            style={{
+          <Pressable
+            android_ripple={RIPPLE_ICON}
+            style={pressedOpacity({
               width: 36,
               height: 36,
-              borderRadius: '50%',
-              background: 'var(--ah-orange-soft)',
-              display: 'flex',
-              alignItems: 'center',
+              borderRadius: 18,
+              backgroundColor: ACCENT_SOFT,
               justifyContent: 'center',
-              flexShrink: 0,
-            }}
+              alignItems: 'center',
+            })}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path
+            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+              <Path
                 d="M21 12l-8.5 8.5a5.5 5.5 0 0 1-7.8-7.8L13.5 4.4a3.5 3.5 0 1 1 4.9 4.9l-8.5 8.5a1.5 1.5 0 1 1-2.1-2.1L15 8"
-                stroke="var(--ah-orange)"
-                strokeWidth="1.9"
+                stroke={ACCENT}
+                strokeWidth={1.9}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-            </svg>
-          </div>
-          <span style={{ flex: 1, fontSize: 14.5, color: 'var(--ah-muted)' }}>{placeholder}</span>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, marginRight: 4 }}>
-            <circle cx="12" cy="12" r="9" stroke="var(--ah-faint)" strokeWidth="1.7" />
-            <circle cx="9" cy="10" r="1.2" fill="var(--ah-faint)" />
-            <circle cx="15" cy="10" r="1.2" fill="var(--ah-faint)" />
-            <path
+            </Svg>
+          </Pressable>
+          <Text style={{ flex: 1, fontSize: 14.5, color: MUTED }}>
+            {placeholder}
+          </Text>
+          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+            <Circle cx={12} cy={12} r={9} stroke={FAINT} strokeWidth={1.7} />
+            <Circle cx={9} cy={10} r={1.2} fill={FAINT} />
+            <Circle cx={15} cy={10} r={1.2} fill={FAINT} />
+            <Path
               d="M8.5 14.5c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8"
-              stroke="var(--ah-faint)"
-              strokeWidth="1.6"
+              stroke={FAINT}
+              strokeWidth={1.6}
               strokeLinecap="round"
               fill="none"
             />
-          </svg>
-        </div>
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: '50%',
-            background: '#1B1B1F',
-            boxShadow: '0 8px 18px -8px rgba(20,20,25,0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
+          </Svg>
+        </Pressable>
+        <Pressable
+          android_ripple={RIPPLE_LIGHT}
+          style={({ pressed }) => [
+            {
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: INK,
+              justifyContent: 'center',
+              alignItems: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              elevation: 4,
+            },
+            pressed && Platform.OS === 'ios' ? { opacity: 0.82, transform: [{ scale: 0.95 }] } : null,
+          ]}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <rect x="9" y="3" width="6" height="11" rx="3" fill="#fff" />
-            <path d="M6 11.5a6 6 0 0 0 12 0M12 17.5V21" stroke="#fff" strokeWidth="2" strokeLinecap="round" fill="none" />
-          </svg>
-        </div>
-      </div>
-    </div>
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+            <Rect x="9" y="3" width="6" height="11" rx="3" fill="#fff" />
+            <Path
+              d="M6 11.5a6 6 0 0 0 12 0M12 17.5V21"
+              stroke="#fff"
+              strokeWidth={2}
+              strokeLinecap="round"
+              fill="none"
+            />
+          </Svg>
+        </Pressable>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    flexDirection: 'column',
+    backgroundColor: BG,
+  },
+  button: {
+    minHeight: 48,
+    borderRadius: 99,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 9,
+    paddingHorizontal: 18,
+  },
+});

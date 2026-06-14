@@ -1,10 +1,14 @@
-import { AHScreen, AHChatInput } from '../components/ui';
-import { AH_BRAND_FONT } from '../theme';
+import { View, Text, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AHScreen, AHChatInput, RIPPLE, RIPPLE_ICON, pressedOpacity } from '../components/ui';
+import { AH_BRAND_FONT, INK, ACCENT, MUTED, LINE, LINE2, BG_SOFT } from '../theme';
 import { useNav } from '../nav';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
-// 15 · Chat · attachment sheet (WhatsApp-style paperclip menu).
+// 16 · Chat · attachment sheet (WhatsApp-style paperclip menu).
 export function ChatAttach() {
   const nav = useNav();
+  const insets = useSafeAreaInsets();
   const sheetItems = [
     { id: 'photo', label: 'Photo', d: 'M3 5h18v15H3zM3 16l5-5 5 5 3-3 5 5' },
     { id: 'camera', label: 'Camera', d: 'M4 7h3l2-3h6l2 3h3v13H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' },
@@ -17,61 +21,223 @@ export function ChatAttach() {
   ];
 
   return (
-    <AHScreen pad={false} style={{ background: 'var(--ah-bg)' }}>
+    <AHScreen pad={false}>
       {/* header */}
-      <div style={{ padding: '58px 18px 12px', display: 'flex', alignItems: 'center', gap: 11, background: '#FFFFFF' }}>
-        <svg onClick={nav.back} width="22" height="22" viewBox="0 0 24 24" fill="none" style={{ cursor: 'pointer' }}>
-          <path d="M14 6l-6 6 6 6" stroke="var(--ah-ink)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <div style={{ width: 40, height: 40, borderRadius: '50%', border: '2px solid var(--ah-orange)', padding: 1.5, boxSizing: 'border-box' }}>
-          <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'color-mix(in oklch, var(--ah-orange) 30%, white)', color: 'var(--ah-orange)', fontFamily: AH_BRAND_FONT, fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            सी
-          </div>
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15.5, fontWeight: 700 }}>Sita Gurung</div>
-          <div style={{ fontSize: 11.5, color: 'var(--ah-orange)', fontWeight: 600, marginTop: 1 }}>Online</div>
-        </div>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <rect x="3" y="6" width="13" height="12" rx="3" stroke="var(--ah-ink)" strokeWidth="1.8" />
-          <path d="M16 10l5-3v10l-5-3z" stroke="var(--ah-ink)" strokeWidth="1.8" strokeLinejoin="round" />
-        </svg>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M4 5c0-1 1-2 2-2h2l2 4-2 1.5c1 3 3 5 6 6L15.5 13l4 2v2c0 1-1 2-2 2-7.2 0-13-5.8-13-13z" stroke="var(--ah-ink)" strokeWidth="1.8" strokeLinejoin="round" />
-        </svg>
-      </div>
+      <View
+        style={{
+          paddingTop: insets.top + 12,
+          paddingHorizontal: 18,
+          paddingBottom: 12,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 11,
+          backgroundColor: '#fff',
+        }}
+      >
+        <Pressable onPress={nav.back}>
+          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+            <Path
+              d="M14 6l-6 6 6 6"
+              stroke={INK}
+              strokeWidth={2.2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        </Pressable>
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            borderWidth: 2,
+            borderColor: ACCENT,
+            padding: 1.5,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <View
+            style={{
+              width: '100%',
+              height: '100%',
+              borderRadius: 20,
+              backgroundColor: ACCENT + '50',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text
+              style={{
+                color: ACCENT,
+                fontFamily: AH_BRAND_FONT,
+                fontWeight: '800',
+                fontSize: 14,
+              }}
+            >
+              {'सी'}
+            </Text>
+          </View>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 15.5, fontWeight: '700', color: INK }}>
+            Sita Gurung
+          </Text>
+          <Text style={{ fontSize: 11.5, color: ACCENT, fontWeight: '600', marginTop: 1 }}>
+            Online
+          </Text>
+        </View>
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+          <Rect x="3" y="6" width="13" height="12" rx="3" stroke={INK} strokeWidth={1.8} />
+          <Path
+            d="M16 10l5-3v10l-5-3z"
+            stroke={INK}
+            strokeWidth={1.8}
+            strokeLinejoin="round"
+          />
+        </Svg>
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+          <Path
+            d="M4 5c0-1 1-2 2-2h2l2 4-2 1.5c1 3 3 5 6 6L15.5 13l4 2v2c0 1-1 2-2 2-7.2 0-13-5.8-13-13z"
+            stroke={INK}
+            strokeWidth={1.8}
+            strokeLinejoin="round"
+          />
+        </Svg>
+      </View>
 
       {/* faded messages behind */}
-      <div style={{ flex: 1, padding: '14px 16px 8px', display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden', opacity: 0.55 }}>
-        <div style={{ alignSelf: 'flex-start', maxWidth: 250, background: '#fff', borderRadius: '20px 20px 20px 6px', padding: '11px 15px 8px', boxShadow: '0 2px 6px -3px rgba(20,20,25,0.18)' }}>
-          <div style={{ fontSize: 14, lineHeight: 1.4 }}>तपाईंलाई के पठाउने?</div>
-        </div>
-        <div style={{ alignSelf: 'flex-end', maxWidth: 260 }}>
-          <div style={{ background: '#1B1B1F', color: '#fff', borderRadius: '20px 20px 6px 20px', padding: '10px 14px 8px' }}>
-            <div style={{ fontSize: 14, lineHeight: 1.4 }}>एक मिनेट, फोटो attach गर्छु…</div>
-          </div>
-        </div>
-      </div>
+      <View
+        style={{
+          flex: 1,
+          padding: 14,
+          paddingHorizontal: 16,
+          paddingBottom: 8,
+          flexDirection: 'column',
+          gap: 10,
+          overflow: 'hidden',
+          opacity: 0.55,
+        }}
+      >
+        <View style={{ alignSelf: 'flex-start', maxWidth: 250 }}>
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 20,
+              borderBottomLeftRadius: 6,
+              padding: 11,
+              paddingHorizontal: 15,
+              paddingBottom: 8,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.18,
+              shadowRadius: 6,
+              elevation: 2,
+            }}
+          >
+            <Text style={{ fontSize: 14, lineHeight: 20, color: INK }}>
+              {'तपाईंलाई के पठाउने?'}
+            </Text>
+          </View>
+        </View>
+        <View style={{ alignSelf: 'flex-end', maxWidth: 260 }}>
+          <View
+            style={{
+              backgroundColor: INK,
+              borderRadius: 20,
+              borderBottomRightRadius: 6,
+              padding: 10,
+              paddingHorizontal: 14,
+              paddingBottom: 8,
+            }}
+          >
+            <Text style={{ fontSize: 14, lineHeight: 20, color: '#fff' }}>
+              {'एक मिनेट, फोटो attach गर्छु…'}
+            </Text>
+          </View>
+        </View>
+      </View>
 
       {/* dim overlay */}
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(20,12,4,0.18)', pointerEvents: 'none' }} />
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(20,12,4,0.18)',
+        }}
+      />
 
       {/* attachment sheet */}
-      <div style={{ position: 'relative', background: '#fff', borderRadius: '24px 24px 0 0', padding: '14px 18px 16px', boxShadow: '0 -14px 36px -10px rgba(80,40,8,0.25)' }}>
-        <div style={{ width: 40, height: 5, borderRadius: 99, background: '#E8DCC0', margin: '0 auto 12px' }} />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, rowGap: 16 }}>
+      <View
+        style={{
+          position: 'relative',
+          backgroundColor: '#fff',
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          padding: 14,
+          paddingHorizontal: 18,
+          paddingBottom: 16,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -14 },
+          shadowOpacity: 0.25,
+          shadowRadius: 36,
+          elevation: 10,
+        }}
+      >
+        <View
+          style={{
+            width: 40,
+            height: 5,
+            borderRadius: 99,
+            backgroundColor: '#E8DCC0',
+            alignSelf: 'center',
+            marginBottom: 12,
+          }}
+        />
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
           {sheetItems.map((it) => (
-            <div key={it.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 60, height: 60, borderRadius: 22, flexShrink: 0, background: '#F6F6F6', color: '#1B1B1F', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-                  <path d={it.d} stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ah-ink)' }}>{it.label}</span>
-            </div>
+            <Pressable
+              key={it.id}
+              android_ripple={RIPPLE}
+              style={pressedOpacity({
+                width: '22%',
+                alignItems: 'center',
+                gap: 8,
+                paddingVertical: 4,
+              })}
+            >
+              <View
+                style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: 22,
+                  flexShrink: 0,
+                  backgroundColor: BG_SOFT,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Svg width={27} height={27} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d={it.d}
+                    stroke={INK}
+                    strokeWidth={1.9}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              </View>
+              <Text style={{ fontSize: 12, fontWeight: '700', color: INK }}>
+                {it.label}
+              </Text>
+            </Pressable>
           ))}
-        </div>
-      </div>
+        </View>
+      </View>
 
       <AHChatInput placeholder="Type a message" />
     </AHScreen>

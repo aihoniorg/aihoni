@@ -1,0 +1,23 @@
+# Cloudflare Pages project config
+# Deploy with:  wrangler pages deploy public --project-name=aihoni
+
+name = "aihoni"
+compatibility_date = "2026-06-14"
+pages_build_output_dir = "./public"
+
+# D1 SQL database — accessed in Pages Functions as `env.DB`
+[[d1_databases]]
+binding = "DB"
+database_name = "aihoni-db"
+database_id = "94a0f87b-527e-4220-9f3a-367ce804cf75"
+
+# KV cache — accessed as `env.CACHE`
+[[kv_namespaces]]
+binding = "CACHE"
+id = "c099c94a10b44aaab50b1a2e2308ad36"
+
+# R2 media bucket — accessed as `env.MEDIA`
+# (uncomment once R2 is enabled in the dashboard)
+# [[r2_buckets]]
+# binding = "MEDIA"
+# bucket_name = "aihoni-media"

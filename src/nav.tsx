@@ -41,10 +41,6 @@ export const ONBOARDING_FLOW: ScreenId[] = [
   'personal',
   'connect',
   'voice',
-  'addBusiness',
-  'businessDetails',
-  'businessDashboard',
-  'knowledge',
   'chats',
 ];
 

@@ -1,7 +1,9 @@
-import { AHScreen, AHProgress, AHTitle, AHField, AHChip, AHButton } from '../components/ui';
+import { View, Text } from 'react-native';
+import { AHScreen, AHHeader, AHTitle, AHField, AHChip, AHButton } from '../components/ui';
+import { MUTED } from '../theme';
 import { useNav } from '../nav';
 
-// 07 · Add your first business — name + a 15-category type grid.
+// 07 · Add a business — name + a 15-category type grid.
 export function AddBusiness() {
   const nav = useNav();
   const types: Array<[string, boolean]> = [
@@ -23,33 +25,37 @@ export function AddBusiness() {
   ];
 
   return (
-    <AHScreen>
-      <AHProgress step={4} />
-      <AHTitle
-        np="पहिलो व्यापार थप्नुहोस्"
-        en="Add your first business"
-        sub="Give it a name and a type — you can add more businesses anytime."
+    <AHScreen pad={false}>
+      <AHHeader title="Add a business" back />
+      <View style={{ flex: 1, paddingHorizontal: 20, paddingBottom: 20 }}>
+        <AHTitle
+        np="व्यापार थप्नुहोस्"
+        en="Tell us about your business"
+        sub="Give it a name and a type — you can add more later."
       />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <View style={{ flexDirection: 'column', gap: 16 }}>
         <AHField label="Business name" value="Shrestha Kirana Pasal" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ah-muted)' }}>Business type</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'column', gap: 8 }}>
+          <Text style={{ fontSize: 13.5, fontWeight: '600', color: MUTED }}>
+            Business type
+          </Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {types.map(([t, sel]) => (
-              <AHChip key={t} selected={sel}>
+              <AHChip key={t} selected={sel} onPress={() => {}}>
                 {t}
               </AHChip>
             ))}
-          </div>
-        </div>
-      </div>
-      <div style={{ flex: 1 }} />
-      <AHButton kind="primary" onClick={nav.next}>
-        Add business
+          </View>
+        </View>
+      </View>
+      <View style={{ flex: 1 }} />
+      <AHButton kind="primary" onClick={() => nav.go('businessDetails')}>
+        Continue
       </AHButton>
-      <AHButton kind="ghost" onClick={nav.next}>
-        Skip for now
+      <AHButton kind="ghost" onClick={nav.back}>
+        Cancel
       </AHButton>
+      </View>
     </AHScreen>
   );
 }

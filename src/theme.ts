@@ -1,37 +1,29 @@
-// theme.ts — aihoni design tokens.
-// These mirror the CSS variables the original prototype set on its canvas
-// wrapper (driven by the design tool's "Tweaks" panel). The system is:
-// white background w/ a subtle dot pattern, Poppins type, charcoal #1B1B1F
-// primaries, neutral greys, and a single blue accent (#3B76EF).
-
 export const ACCENT = '#3B76EF';
+export const INK = '#1B1B1F';
+export const MUTED = '#8A8A8E';
+export const FAINT = '#A8A8AC';
+export const LINE = '#EFECEC';
+export const LINE2 = '#E6E6E6';
+export const BG_SOFT = '#F6F6F6';
+export const BG_SOLID = '#FFFFFF';
+export const BG = '#FFFFFF';
+export const GREEN = '#2E9E6B';
 
-export const AH_FONT =
-  "'Poppins', -apple-system, system-ui, 'Helvetica Neue', sans-serif";
-export const AH_BRAND_FONT = "'Baloo 2', -apple-system, system-ui, sans-serif";
+// Pre-computed accent mixes with white
+export const ACCENT_SOFT = '#E7EEFD';   // ~12%
+export const ACCENT_SOFT2 = '#D4E1FC';  // ~22%
+export const ACCENT_SOFT3 = '#ECF2FE';  // ~10%
+export const ACCENT_MED = '#C5D6FB';    // ~30%
 
-// CSS custom properties applied to the app root so var()/color-mix() resolve.
-// Typed loosely because custom properties aren't part of React.CSSProperties.
-export const themeVars: Record<string, string> = {
-  '--ah-blue': ACCENT,
-  '--ah-orange': ACCENT, // historically two tokens; both resolve to the accent
-  '--ah-ink': '#1B1B1F',
-  '--ah-muted': '#8A8A8E',
-  '--ah-bg':
-    'radial-gradient(circle at 1px 1px, rgba(20,20,25,0.045) 1px, transparent 0) 0 0 / 17px 17px, #FFFFFF',
-  '--ah-bg-solid': '#FFFFFF',
-  '--ah-bg-pattern2':
-    'radial-gradient(circle at 1px 1px, rgba(20,20,25,0.06) 1px, transparent 0) 0 0 / 17px 17px, #F6F6F6',
-  '--ah-bg-soft': '#F6F6F6',
-  '--ah-card': '#FFFFFF',
-  '--ah-line': '#EFECEC',
-  '--ah-line2': '#E6E6E6',
-  '--ah-faint': '#A8A8AC',
-  '--ah-blue-soft': '#F6F6F6',
-  '--ah-blue-soft2': '#E6E6E6',
-  '--ah-orange-soft': `color-mix(in oklch, ${ACCENT} 12%, white)`,
-  '--ah-shadow-sm': '0 1px 3px rgba(20,20,25,0.06)',
-  '--ah-shadow-md': '0 6px 18px -10px rgba(20,20,25,0.14)',
-  '--ah-shadow-lg': '0 14px 34px -16px rgba(20,20,25,0.18)',
-  '--ah-btn-radius': '99px',
-};
+// Font family names (loaded via expo-font)
+export const AH_FONT = 'Poppins_600SemiBold';
+export const AH_BRAND_FONT = 'Baloo2_800ExtraBold';
+
+/** Blend a hex color with white at the given fraction (0-1). */
+export function mixWithWhite(hex: string, frac: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const mix = (c: number) => Math.round(c * frac + 255 * (1 - frac));
+  return `rgb(${mix(r)},${mix(g)},${mix(b)})`;
+}

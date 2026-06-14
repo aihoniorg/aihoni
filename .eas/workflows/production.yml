@@ -1,0 +1,19 @@
+name: Production build
+
+# Manual-only trigger — run via `eas workflow:run production.yml`
+# or from the EAS dashboard. Builds Android + iOS in parallel.
+
+jobs:
+  build_android_prod:
+    name: Build Android production
+    type: build
+    params:
+      platform: android
+      profile: production
+
+  build_ios_prod:
+    name: Build iOS production
+    type: build
+    params:
+      platform: ios
+      profile: production

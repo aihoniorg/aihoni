@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "aihoni",
+    "slug": "aihoni",
+    "owner": "aihoni",
+    "version": "1.0.0",
+    "scheme": "aihoni",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1d2e"
+    },
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.nepfinder.aihoni",
+      "icon": "./assets/icon.png",
+      "associatedDomains": ["applinks:aihoni.com", "applinks:www.aihoni.com"],
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#1a1d2e"
+      },
+      "package": "com.nepfinder.aihoni",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "aihoni.com" },
+            { "scheme": "https", "host": "www.aihoni.com" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "newArchEnabled": true,
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#3B76EF",
+          "defaultChannel": "default"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1fafd0c0-1222-4538-8b42-88fc31553b45"
+      }
+    }
+  }
+}

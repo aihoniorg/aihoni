@@ -1,21 +1,35 @@
-import { AHScreen, AHChatInput, AHOrb } from '../components/ui';
-import { AH_BRAND_FONT } from '../theme';
+import { View, Text, ScrollView, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AHScreen, AHChatInput, AHOrb, RIPPLE, pressedOpacity } from '../components/ui';
+import { AH_BRAND_FONT, INK, ACCENT, MUTED, FAINT, LINE, LINE2, BG_SOFT, ACCENT_SOFT } from '../theme';
 import { useNav } from '../nav';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
 // 15 · Chat with aihoni — voice-ask hero + conversation + contextual actions.
 export function Chat() {
   const nav = useNav();
-  const dbl = (col = 'rgba(255,255,255,0.85)') => (
-    <svg width="14" height="8" viewBox="0 0 16 10" style={{ flexShrink: 0 }}>
-      <path d="M1 5l3 3.4L9.5 2" stroke={col} strokeWidth="1.7" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M7 5l3 3.4L15.5 2" stroke={col} strokeWidth="1.7" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  const insets = useSafeAreaInsets();
 
-  const pattern = {
-    background:
-      'radial-gradient(circle at 10% 20%, rgba(20,20,25,0.035) 0 1.2px, transparent 1.3px) 0 0/22px 22px, radial-gradient(circle at 60% 70%, rgba(20,20,25,0.03) 0 1px, transparent 1.1px) 0 0/30px 30px, #FFFFFF',
-  };
+  const dbl = (col = 'rgba(255,255,255,0.85)') => (
+    <Svg width={14} height={8} viewBox="0 0 16 10" style={{ flexShrink: 0 }}>
+      <Path
+        d="M1 5l3 3.4L9.5 2"
+        stroke={col}
+        strokeWidth={1.7}
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M7 5l3 3.4L15.5 2"
+        stroke={col}
+        strokeWidth={1.7}
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
 
   const actions = [
     { id: 'order', label: 'Order', active: true, d: 'M3 5h2l2 11h10l2-8H6M9 20.5A1.3 1.3 0 1 0 9 18a1.3 1.3 0 0 0 0 2.5zM17 20.5a1.3 1.3 0 1 0 0-2.5 1.3 1.3 0 0 0 0 2.5z' },
@@ -26,147 +40,417 @@ export function Chat() {
   ];
 
   return (
-    <AHScreen pad={false} style={{ background: 'var(--ah-bg)' }}>
+    <AHScreen pad={false}>
       {/* header */}
-      <div style={{ padding: '58px 18px 12px', display: 'flex', alignItems: 'center', gap: 11, background: '#FFFFFF' }}>
-        <svg onClick={nav.back} width="22" height="22" viewBox="0 0 24 24" fill="none" style={{ cursor: 'pointer' }}>
-          <path d="M14 6l-6 6 6 6" stroke="var(--ah-ink)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <div style={{ flexShrink: 0 }}>
+      <View
+        style={{
+          paddingTop: insets.top + 12,
+          paddingHorizontal: 18,
+          paddingBottom: 12,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 11,
+          backgroundColor: '#fff',
+        }}
+      >
+        <Pressable onPress={nav.back}>
+          <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+            <Path
+              d="M14 6l-6 6 6 6"
+              stroke={INK}
+              strokeWidth={2.2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        </Pressable>
+        <View style={{ flexShrink: 0 }}>
           <AHOrb size={42} />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: AH_BRAND_FONT, fontSize: 17.5, fontWeight: 800, lineHeight: 1 }}>
-            aihoni<span style={{ color: 'var(--ah-orange)' }}>.</span>
-          </div>
-          <div style={{ fontSize: 11.5, color: 'var(--ah-orange)', fontWeight: 700, marginTop: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--ah-orange)' }} />
-            सबै पसल · Any business
-          </div>
-        </div>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M11 5h2v14h-2zM5 9h2v6H5zM17 9h2v6h-2z" fill="var(--ah-ink)" />
-        </svg>
-        <svg width="20" height="20" viewBox="0 0 24 24">
-          <circle cx="12" cy="5" r="1.7" fill="var(--ah-ink)" />
-          <circle cx="12" cy="12" r="1.7" fill="var(--ah-ink)" />
-          <circle cx="12" cy="19" r="1.7" fill="var(--ah-ink)" />
-        </svg>
-      </div>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text
+            style={{
+              fontFamily: AH_BRAND_FONT,
+              fontSize: 17.5,
+              fontWeight: '800',
+              lineHeight: 20,
+              color: INK,
+            }}
+          >
+            {'aihoni'}
+            <Text style={{ color: ACCENT }}>{'.'}</Text>
+          </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 4,
+              marginTop: 3,
+            }}
+          >
+            <View
+              style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: ACCENT }}
+            />
+            <Text style={{ fontSize: 11.5, color: ACCENT, fontWeight: '700' }}>
+              {'सबै पसल · Any business'}
+            </Text>
+          </View>
+        </View>
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+          <Path d="M11 5h2v14h-2zM5 9h2v6H5zM17 9h2v6h-2z" fill={INK} />
+        </Svg>
+        <Svg width={20} height={20} viewBox="0 0 24 24">
+          <Circle cx={12} cy={5} r={1.7} fill={INK} />
+          <Circle cx={12} cy={12} r={1.7} fill={INK} />
+          <Circle cx={12} cy={19} r={1.7} fill={INK} />
+        </Svg>
+      </View>
 
       {/* voice-ask hero */}
-      <div style={{ margin: '10px 16px 0', borderRadius: 22, background: '#1B1B1F', color: '#fff', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 13, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', right: -30, top: -30, width: 130, height: 130, borderRadius: '50%', background: 'var(--ah-orange)', opacity: 0.5, filter: 'blur(28px)' }} />
+      <Pressable
+        android_ripple={{ color: 'rgba(255,255,255,0.18)', borderless: false }}
+        style={pressedOpacity({
+          marginHorizontal: 16,
+          marginTop: 10,
+          borderRadius: 22,
+          backgroundColor: INK,
+          padding: 14,
+          paddingHorizontal: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 13,
+          overflow: 'hidden',
+        }, 0.82)}
+      >
         <AHOrb size={46} />
-        <div style={{ flex: 1, position: 'relative' }}>
-          <div style={{ fontSize: 15.5, fontWeight: 700 }}>केहि सोध्नुहोस्…</div>
-          <div style={{ fontSize: 12, opacity: 0.65, marginTop: 2 }}>Hold to speak · or type</div>
-        </div>
-        <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24">
-            <rect x="9" y="3" width="6" height="11" rx="3" fill="#fff" />
-            <path d="M6 11.5a6 6 0 0 0 12 0M12 17.5V21" stroke="#fff" strokeWidth="2" strokeLinecap="round" fill="none" />
-          </svg>
-        </div>
-      </div>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 15.5, fontWeight: '700', color: '#fff' }}>
+            {'केहि सोध्नुहोस्…'}
+          </Text>
+          <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>
+            {'Hold to speak · or type'}
+          </Text>
+        </View>
+        <View
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 19,
+            backgroundColor: 'rgba(255,255,255,0.14)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Svg width={16} height={16} viewBox="0 0 24 24">
+            <Rect x="9" y="3" width="6" height="11" rx="3" fill="#fff" />
+            <Path
+              d="M6 11.5a6 6 0 0 0 12 0M12 17.5V21"
+              stroke="#fff"
+              strokeWidth={2}
+              strokeLinecap="round"
+              fill="none"
+            />
+          </Svg>
+        </View>
+      </Pressable>
 
       {/* messages */}
-      <div className="ah-scroll" style={{ flex: 1, padding: '12px 16px 8px', display: 'flex', flexDirection: 'column', gap: 9, overflowY: 'auto', ...pattern }}>
-        <div style={{ alignSelf: 'flex-start', maxWidth: 280, background: '#fff', borderRadius: '20px 20px 20px 6px', padding: '10px 15px 7px', boxShadow: '0 2px 6px -3px rgba(20,20,25,0.18)' }}>
-          <div style={{ fontSize: 14.5, lineHeight: 1.4 }}>नमस्ते Sunita! आज के सोध्न चाहनुहुन्छ?</div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 3 }}>
-            <span style={{ fontSize: 10.5, color: 'var(--ah-muted)' }}>10:12</span>
-          </div>
-        </div>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: '#FFFFFF' }}
+        contentContainerStyle={{
+          padding: 12,
+          paddingHorizontal: 16,
+          paddingBottom: 8,
+          gap: 9,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* AI bubble */}
+        <View
+          style={{
+            alignSelf: 'flex-start',
+            maxWidth: 280,
+            backgroundColor: '#fff',
+            borderRadius: 20,
+            borderBottomLeftRadius: 6,
+            padding: 10,
+            paddingHorizontal: 15,
+            paddingBottom: 7,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.18,
+            shadowRadius: 6,
+            elevation: 2,
+          }}
+        >
+          <Text style={{ fontSize: 14.5, lineHeight: 20, color: INK }}>
+            {'नमस्ते Sunita! आज के सोध्न चाहनुहुन्छ?'}
+          </Text>
+          <View style={{ alignItems: 'flex-end', marginTop: 3 }}>
+            <Text style={{ fontSize: 10.5, color: MUTED }}>10:12</Text>
+          </View>
+        </View>
 
-        <div style={{ alignSelf: 'flex-end', maxWidth: 270 }}>
-          <div style={{ background: '#1B1B1F', color: '#fff', borderRadius: '20px 20px 6px 20px', padding: '9px 14px 7px' }}>
-            <div style={{ fontSize: 14.5, lineHeight: 1.4 }}>Shrestha Kirana मा बासमती चामल छ?</div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 5, marginTop: 3, alignItems: 'center' }}>
-              <span style={{ fontSize: 10.5, opacity: 0.85 }}>10:14</span>
+        {/* user bubble */}
+        <View style={{ alignSelf: 'flex-end', maxWidth: 270 }}>
+          <View
+            style={{
+              backgroundColor: INK,
+              borderRadius: 20,
+              borderBottomRightRadius: 6,
+              padding: 9,
+              paddingHorizontal: 14,
+              paddingBottom: 7,
+            }}
+          >
+            <Text style={{ fontSize: 14.5, lineHeight: 20, color: '#fff' }}>
+              {'Shrestha Kirana मा बासमती चामल छ?'}
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                gap: 5,
+                marginTop: 3,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.85)' }}>
+                10:14
+              </Text>
               {dbl()}
-            </div>
-          </div>
-        </div>
+            </View>
+          </View>
+        </View>
 
-        <div style={{ alignSelf: 'flex-start', maxWidth: 295 }}>
-          <div style={{ background: '#fff', borderRadius: '20px 20px 20px 6px', padding: '10px 15px 8px', boxShadow: '0 2px 6px -3px rgba(20,20,25,0.18)' }}>
-            <div style={{ fontSize: 14.5, lineHeight: 1.45 }}>
-              हो! <strong>बासमती चामल · २५ केजी</strong> — रू 2,350 मा उपलब्ध छ। डेलिभरी पनि हुन्छ।
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
-              <span style={{ fontSize: 10.5, color: 'var(--ah-muted)' }}>10:14</span>
-            </div>
-          </div>
-        </div>
+        {/* AI response */}
+        <View style={{ alignSelf: 'flex-start', maxWidth: 295 }}>
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 20,
+              borderBottomLeftRadius: 6,
+              padding: 10,
+              paddingHorizontal: 15,
+              paddingBottom: 8,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.18,
+              shadowRadius: 6,
+              elevation: 2,
+            }}
+          >
+            <Text style={{ fontSize: 14.5, lineHeight: 21 }}>
+              {'हो! '}
+              <Text style={{ fontWeight: '700' }}>{'बासमती चामल · २५ केजी'}</Text>
+              {' — रू 2,350 मा उपलब्ध छ। डेलिभरी पनि हुन्छ।'}
+            </Text>
+            <View style={{ alignItems: 'flex-end', marginTop: 2 }}>
+              <Text style={{ fontSize: 10.5, color: MUTED }}>10:14</Text>
+            </View>
+          </View>
+        </View>
 
         {/* contextual quick actions */}
-        <div style={{ alignSelf: 'flex-start', maxWidth: 300 }}>
-          <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--ah-muted)', letterSpacing: 0.2, margin: '0 2px 6px', display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--ah-orange)' }} />
-            यो व्यापारको लागि · suggested
-          </div>
-          <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+        <View style={{ alignSelf: 'flex-start', maxWidth: 300 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+              marginBottom: 6,
+              marginLeft: 2,
+            }}
+          >
+            <View
+              style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: ACCENT }}
+            />
+            <Text
+              style={{
+                fontSize: 10.5,
+                fontWeight: '700',
+                color: MUTED,
+                letterSpacing: 0.2,
+              }}
+            >
+              {'यो व्यापारको लागि · suggested'}
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 7, flexWrap: 'wrap' }}>
             {actions.map((a) => (
-              <div
+              <Pressable
                 key={a.id}
-                style={{
-                  display: 'flex',
+                onPress={a.id === 'order' ? () => nav.go('order') : undefined}
+                android_ripple={RIPPLE}
+                style={pressedOpacity({
+                  flexDirection: 'row',
                   alignItems: 'center',
                   gap: 6,
-                  padding: '7px 12px',
+                  paddingHorizontal: 12,
+                  paddingVertical: 7,
                   borderRadius: 99,
-                  background: a.active ? '#1B1B1F' : '#fff',
-                  color: a.active ? '#fff' : 'var(--ah-ink)',
-                  border: a.active ? '1.5px solid #1B1B1F' : '1.5px solid var(--ah-line2)',
-                  boxShadow: a.active ? '0 6px 14px -8px rgba(20,20,25,0.35)' : '0 2px 6px -4px rgba(20,20,25,0.15)',
-                }}
+                  backgroundColor: a.active ? INK : '#fff',
+                  borderWidth: 1.5,
+                  borderColor: a.active ? INK : LINE2,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: a.active ? 6 : 2 },
+                  shadowOpacity: a.active ? 0.35 : 0.15,
+                  shadowRadius: a.active ? 14 : 6,
+                  elevation: a.active ? 4 : 1,
+                })}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d={a.d} stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span style={{ fontSize: 12.5, fontWeight: 700 }}>{a.label}</span>
-              </div>
+                <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d={a.d}
+                    stroke={a.active ? '#fff' : INK}
+                    strokeWidth={1.9}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+                <Text
+                  style={{
+                    fontSize: 12.5,
+                    fontWeight: '700',
+                    color: a.active ? '#fff' : INK,
+                  }}
+                >
+                  {a.label}
+                </Text>
+              </Pressable>
             ))}
-          </div>
-        </div>
+          </View>
+        </View>
 
         {/* inline order form */}
-        <div style={{ alignSelf: 'flex-start', width: 290, background: '#fff', borderRadius: 18, padding: '13px 14px', boxShadow: '0 8px 22px -12px rgba(20,20,25,0.3)', border: '1px solid var(--ah-line)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 11 }}>
-            <div style={{ width: 30, height: 30, borderRadius: 9, background: 'var(--ah-orange-soft)', color: 'var(--ah-orange)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M3 5h2l2 11h10l2-8H6M9 20.5A1.3 1.3 0 1 0 9 18a1.3 1.3 0 0 0 0 2.5zM17 20.5a1.3 1.3 0 1 0 0-2.5 1.3 1.3 0 0 0 0 2.5z" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 800 }}>अर्डर · Order</div>
-              <div style={{ fontSize: 11, color: 'var(--ah-muted)' }}>बासमती चामल · 25kg</div>
-            </div>
-            <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--ah-orange)' }}>रू 2,350</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>
-            <span style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ah-muted)' }}>Quantity</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'var(--ah-bg-soft)', borderRadius: 99, padding: '5px 14px' }}>
-              <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--ah-muted)' }}>−</span>
-              <span style={{ fontSize: 14, fontWeight: 800, minWidth: 14, textAlign: 'center' }}>1</span>
-              <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--ah-orange)' }}>+</span>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--ah-orange-soft)', borderRadius: 12, padding: '8px 11px', marginBottom: 11 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M3 13h13V6H3zM16 9h4l1 4v3h-5" stroke="var(--ah-orange)" strokeWidth="1.7" strokeLinejoin="round" />
-              <circle cx="7" cy="17" r="1.5" stroke="var(--ah-orange)" strokeWidth="1.6" />
-              <circle cx="18" cy="17" r="1.5" stroke="var(--ah-orange)" strokeWidth="1.6" />
-            </svg>
-            <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600 }}>घर डेलिभरी · Lagankhel</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ah-orange)' }}>रू 50</span>
-          </div>
-          <div style={{ height: 42, borderRadius: 99, background: '#1B1B1F', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 14, fontWeight: 700 }}>
-            Confirm order · रू 2,400
-          </div>
-        </div>
-      </div>
+        <View
+          style={{
+            alignSelf: 'flex-start',
+            width: 290,
+            backgroundColor: '#fff',
+            borderRadius: 18,
+            padding: 13,
+            paddingHorizontal: 14,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.3,
+            shadowRadius: 22,
+            elevation: 5,
+            borderWidth: 1,
+            borderColor: LINE,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 11,
+            }}
+          >
+            <View
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 9,
+                backgroundColor: ACCENT_SOFT,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M3 5h2l2 11h10l2-8H6M9 20.5A1.3 1.3 0 1 0 9 18a1.3 1.3 0 0 0 0 2.5zM17 20.5a1.3 1.3 0 1 0 0-2.5 1.3 1.3 0 0 0 0 2.5z"
+                  stroke={ACCENT}
+                  strokeWidth={1.9}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: INK }}>
+                {'अर्डर · Order'}
+              </Text>
+              <Text style={{ fontSize: 11, color: MUTED }}>{'बासमती चामल · 25kg'}</Text>
+            </View>
+            <Text style={{ fontSize: 14, fontWeight: '800', color: ACCENT }}>
+              {'रू 2,350'}
+            </Text>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 9,
+            }}
+          >
+            <Text style={{ fontSize: 12.5, fontWeight: '600', color: MUTED }}>
+              Quantity
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 14,
+                backgroundColor: BG_SOFT,
+                borderRadius: 99,
+                paddingHorizontal: 14,
+                paddingVertical: 5,
+              }}
+            >
+              <Text style={{ fontSize: 17, fontWeight: '700', color: MUTED }}>−</Text>
+              <Text style={{ fontSize: 14, fontWeight: '800', minWidth: 14, textAlign: 'center', color: INK }}>
+                1
+              </Text>
+              <Text style={{ fontSize: 17, fontWeight: '700', color: ACCENT }}>+</Text>
+            </View>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              backgroundColor: ACCENT_SOFT,
+              borderRadius: 12,
+              padding: 8,
+              paddingHorizontal: 11,
+              marginBottom: 11,
+            }}
+          >
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M3 13h13V6H3zM16 9h4l1 4v3h-5"
+                stroke={ACCENT}
+                strokeWidth={1.7}
+                strokeLinejoin="round"
+              />
+              <Circle cx={7} cy={17} r={1.5} stroke={ACCENT} strokeWidth={1.6} />
+              <Circle cx={18} cy={17} r={1.5} stroke={ACCENT} strokeWidth={1.6} />
+            </Svg>
+            <Text style={{ flex: 1, fontSize: 12.5, fontWeight: '600', color: INK }}>
+              {'घर डेलिभरी · Lagankhel'}
+            </Text>
+            <Text style={{ fontSize: 12, fontWeight: '700', color: ACCENT }}>{'रू 50'}</Text>
+          </View>
+          <Pressable
+            onPress={() => nav.go('order')}
+            android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: false }}
+            style={pressedOpacity({
+              height: 42,
+              borderRadius: 99,
+              backgroundColor: INK,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }, 0.82)}
+          >
+            <Text style={{ fontSize: 14, fontWeight: '700', color: '#fff' }}>
+              {'Confirm order · रू 2,400'}
+            </Text>
+          </Pressable>
+        </View>
+      </ScrollView>
 
       <AHChatInput placeholder="Type or speak…" />
     </AHScreen>

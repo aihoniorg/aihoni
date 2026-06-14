@@ -1,159 +1,865 @@
-import { AHScreen, AHTabBar, AHCoin } from '../components/ui';
-import { AH_BRAND_FONT } from '../theme';
+import { useEffect, useState } from 'react';
+import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AHScreen, AHTabBar, AHCoin, RIPPLE, pressedOpacity } from '../components/ui';
+import { AH_BRAND_FONT, INK, ACCENT, MUTED, LINE, LINE2, FAINT, BG_SOFT, ACCENT_SOFT, GREEN, mixWithWhite } from '../theme';
 import { useNav } from '../nav';
+import { getPushToken, sendLocalTestNotification } from '../notifications';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import type { ReactNode } from 'react';
 
-// 20 · Profile — identity, wallets carousel, businesses, settings.
+const WALLET_W = 196;
+const WALLET_H = 168;
+
+function SectionHeader({ title, action }: { title: string; action?: ReactNode }) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        justifyContent: 'space-between',
+        marginTop: 22,
+        marginBottom: 10,
+        marginHorizontal: 2,
+      }}
+    >
+      <Text style={{ fontSize: 15, fontWeight: '700', color: INK }}>{title}</Text>
+      {action}
+    </View>
+  );
+}
+
+function Row({
+  icon,
+  title,
+  sub,
+  onPress,
+  trailing,
+}: {
+  icon: ReactNode;
+  title: string;
+  sub?: string;
+  onPress?: () => void;
+  trailing?: ReactNode;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      android_ripple={RIPPLE}
+      style={pressedOpacity({
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 13,
+        padding: 12,
+        paddingHorizontal: 15,
+      })}
+    >
+      <View
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 11,
+          backgroundColor: ACCENT_SOFT,
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontSize: 14.5, fontWeight: '600', color: INK }}>{title}</Text>
+        {sub ? (
+          <Text style={{ fontSize: 12, color: MUTED, marginTop: 1 }}>{sub}</Text>
+        ) : null}
+      </View>
+      {trailing ?? (
+        <Svg width={7} height={12} viewBox="0 0 8 14">
+          <Path
+            d="M1 1l5.5 6L1 13"
+            stroke="#C2B49A"
+            strokeWidth={2}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </Svg>
+      )}
+    </Pressable>
+  );
+}
+
+function Card({ children }: { children: ReactNode }) {
+  return (
+    <View
+      style={{
+        borderRadius: 18,
+        backgroundColor: '#fff',
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.14,
+        shadowRadius: 12,
+        elevation: 3,
+      }}
+    >
+      {children}
+    </View>
+  );
+}
+
+interface Wallet {
+  name: string;
+  id: string;
+  pts: string;
+  c: string;
+  glyph: string;
+  isDefault?: boolean;
+}
+
+function WalletCard({ w, onTopUp }: { w: Wallet; onTopUp: () => void }) {
+  const isDefault = !!w.isDefault;
+  // One unified card style for all wallets — light/white background with brand-color accents.
+  // The wallet's own color is what distinguishes each (icon tint, accent stripe, badge color).
+
+  return (
+    <Pressable
+      onPress={onTopUp}
+      android_ripple={RIPPLE}
+      style={pressedOpacity(
+        {
+          width: WALLET_W,
+          height: WALLET_H,
+          borderRadius: 22,
+          overflow: 'hidden',
+          flexShrink: 0,
+          backgroundColor: '#fff',
+          borderWidth: 1,
+          borderColor: LINE,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.06,
+          shadowRadius: 12,
+          elevation: 2,
+        },
+        0.94,
+      )}
+    >
+      {/* Soft brand-tinted band across the top — subtle, NOT heavy */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 72,
+          backgroundColor: mixWithWhite(w.c, 0.07),
+        }}
+      />
+      {/* Brand color accent stripe on the very top edge */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 4,
+          backgroundColor: w.c,
+        }}
+      />
+
+      <View style={{ flex: 1, padding: 16, justifyContent: 'space-between' }}>
+        {/* top row — brand chip + status */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: 4,
+          }}
+        >
+          <View
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 12,
+              backgroundColor: mixWithWhite(w.c, 0.16),
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text
+              style={{
+                color: w.c,
+                fontFamily: AH_BRAND_FONT,
+                fontWeight: '800',
+                fontSize: 16,
+              }}
+            >
+              {w.glyph}
+            </Text>
+          </View>
+          {isDefault ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+                backgroundColor: mixWithWhite(w.c, 0.14),
+                borderRadius: 99,
+                paddingHorizontal: 9,
+                paddingVertical: 3,
+              }}
+            >
+              <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: GREEN }} />
+              <Text
+                style={{
+                  fontSize: 9.5,
+                  fontWeight: '800',
+                  color: w.c,
+                  letterSpacing: 0.4,
+                }}
+              >
+                DEFAULT
+              </Text>
+            </View>
+          ) : (
+            <Text
+              style={{
+                fontSize: 10.5,
+                fontWeight: '800',
+                color: w.c,
+                letterSpacing: 0.4,
+                textTransform: 'uppercase',
+              }}
+            >
+              Business
+            </Text>
+          )}
+        </View>
+
+        {/* hero balance + name */}
+        <View>
+          <Text
+            style={{
+              fontSize: 10.5,
+              fontWeight: '700',
+              color: MUTED,
+              letterSpacing: 0.6,
+              textTransform: 'uppercase',
+              marginBottom: 3,
+            }}
+            numberOfLines={1}
+          >
+            {w.name}
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+            <Text
+              style={{
+                fontSize: 34,
+                fontWeight: '800',
+                letterSpacing: -1,
+                lineHeight: 36,
+                color: INK,
+              }}
+            >
+              {w.pts}
+            </Text>
+            <Text style={{ fontSize: 13, fontWeight: '700', color: MUTED }}>pts</Text>
+          </View>
+          <Text style={{ fontSize: 10.5, fontWeight: '600', color: FAINT, marginTop: 2 }}>
+            {'≈ रू ' + w.pts}
+          </Text>
+        </View>
+
+        {/* footer — ID + chevron */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderTopWidth: 1,
+            borderTopColor: LINE,
+            paddingTop: 9,
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Svg width={9} height={9} viewBox="0 0 24 24" fill="none">
+              <Circle cx={12} cy={12} r={10} stroke={FAINT} strokeWidth={2} />
+              <Circle cx={12} cy={12} r={4} fill={FAINT} />
+            </Svg>
+            <Text
+              style={{
+                fontSize: 10,
+                fontWeight: '700',
+                color: MUTED,
+                letterSpacing: 0.5,
+                fontVariant: ['tabular-nums'],
+              }}
+            >
+              {w.id}
+            </Text>
+          </View>
+          <View
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 14,
+              backgroundColor: mixWithWhite(w.c, 0.14),
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Svg width={12} height={12} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M5 12h14M13 6l6 6-6 6"
+                stroke={w.c}
+                strokeWidth={2.4}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+          </View>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+function AddWalletCard({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      android_ripple={RIPPLE}
+      style={pressedOpacity({
+        width: WALLET_W,
+        height: WALLET_H,
+        borderRadius: 24,
+        borderWidth: 1.5,
+        borderStyle: 'dashed',
+        borderColor: LINE2,
+        backgroundColor: BG_SOFT,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 12,
+        flexShrink: 0,
+      })}
+    >
+      <View
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: 26,
+          backgroundColor: '#fff',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderWidth: 1.5,
+          borderColor: ACCENT_SOFT,
+          shadowColor: ACCENT,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 8,
+          elevation: 2,
+        }}
+      >
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <Path
+            d="M12 5v14M5 12h14"
+            stroke={ACCENT}
+            strokeWidth={2.6}
+            strokeLinecap="round"
+          />
+        </Svg>
+      </View>
+      <View style={{ alignItems: 'center', gap: 2 }}>
+        <Text style={{ fontSize: 13.5, fontWeight: '700', color: INK }}>Add wallet</Text>
+        <Text style={{ fontSize: 10.5, color: MUTED }}>Personal or business</Text>
+      </View>
+    </Pressable>
+  );
+}
+
+// 21 · Profile — identity, wallets, businesses, payment, personal information.
 export function Profile() {
   const nav = useNav();
-  const menu: Array<[string, string, string]> = [
-    ['Personal information', 'Name, mobile, district', 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM5 20a7 7 0 0 1 14 0'],
-    ['Payment & recharge', 'eSewa, Khalti, IME Pay', 'M3 7h18v12H3zM3 11h18M16 15h2'],
-    ['Language', 'नेपाली · English', 'M4 5h16M9 5c0 6-2.5 10-5 12M7 9c1 3 4 5 8 6'],
-    ['Privacy & data', 'Personal and business kept separate', 'M12 3l7 3v6c0 4-3 7-7 8-4-1-7-4-7-8V6z'],
+  const insets = useSafeAreaInsets();
+  const [token, setToken] = useState<string | null>(getPushToken());
+
+  // Poll briefly for the token (registration completes async on app start).
+  useEffect(() => {
+    if (token) return;
+    const id = setInterval(() => {
+      const t = getPushToken();
+      if (t) {
+        setToken(t);
+        clearInterval(id);
+      }
+    }, 800);
+    return () => clearInterval(id);
+  }, [token]);
+
+  const copyToken = async () => {
+    if (!token) return;
+    await Clipboard.setStringAsync(token);
+    Alert.alert('Copied', 'Push token copied to clipboard.');
+  };
+
+  const fireTest = async () => {
+    try {
+      await sendLocalTestNotification(
+        'aihoni.',
+        'राम Thapa: दाल को बोरा छ?',
+        { screen: 'chat' },
+      );
+    } catch (e) {
+      Alert.alert('Could not fire test', String(e));
+    }
+  };
+
+  const wallets: Wallet[] = [
+    { name: 'aihoni Points', id: 'AIH-2480-SNT', pts: '2,480', c: ACCENT, glyph: 'P', isDefault: true },
+    { name: 'Shrestha Kirana', id: 'AIH-0940-SKP', pts: '940', c: '#3A6FE0', glyph: 'श' },
+    { name: 'Sunita Fashion', id: 'AIH-0312-SNF', pts: '312', c: '#8B5CF6', glyph: 'सु' },
+  ];
+
+  const businesses: Array<[string, string, string]> = [
+    ['प', 'Shrestha Kirana Pasal', '142 products · Lagankhel'],
+    ['कप', 'Sunita Fashion', '38 products · Pulchowk'],
+  ];
+
+  const payments: Array<[string, string, string, string]> = [
+    ['eSewa', '...4821 · Linked', '#5BB12F', 'e'],
+    ['Khalti', 'Wallet · Linked', '#5C2D91', 'K'],
+    ['IME Pay', 'Tap to link', '#C0392B', 'I'],
   ];
 
   return (
     <AHScreen pad={false}>
-      <div className="ah-scroll" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', padding: '58px 20px 0' }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingTop: insets.top + 8,
+          paddingHorizontal: 20,
+          paddingBottom: 0,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* profile header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 60, height: 60, borderRadius: '50%', border: '2.5px solid var(--ah-orange)', padding: 2, boxSizing: 'border-box' }}>
-            <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'color-mix(in oklch, var(--ah-orange) 22%, white)', color: 'var(--ah-orange)', fontFamily: AH_BRAND_FONT, fontWeight: 800, fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              S
-            </div>
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: -0.3 }}>Sunita Shrestha</div>
-            <div style={{ fontSize: 13, color: 'var(--ah-muted)', marginTop: 1 }}>+977 98XXXXXXXX · Lalitpur</div>
-          </div>
-          <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ah-orange)', background: 'color-mix(in oklch, var(--ah-orange) 14%, white)', borderRadius: 99, padding: '7px 14px' }}>Edit</div>
-        </div>
-
-        {/* wallets */}
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', margin: '20px 2px 9px' }}>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>Wallets</span>
-          <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ah-orange)' }}>+ Add wallet</span>
-        </div>
-        <div className="ah-wscroll" style={{ display: 'flex', gap: 12, overflowX: 'auto', overflowY: 'hidden', margin: '0 -20px', padding: '0 20px 4px' }}>
-          {/* default wallet */}
-          <div style={{ flex: '0 0 auto', width: 286, borderRadius: 22, background: '#fff', padding: '16px 18px', boxShadow: '0 12px 28px -16px rgba(20,20,25,0.28)', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', top: -40, right: -30, width: 130, height: 130, borderRadius: '50%', background: 'var(--ah-orange)', opacity: 0.1, filter: 'blur(20px)', pointerEvents: 'none' }} />
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <AHCoin size={20} />
-                <span style={{ fontSize: 13, color: 'var(--ah-muted)', fontWeight: 600 }}>aihoni Points</span>
-              </div>
-              <span style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--ah-orange)', background: 'color-mix(in oklch, var(--ah-orange) 14%, white)', borderRadius: 99, padding: '4px 9px', letterSpacing: 0.3 }}>
-                DEFAULT
-              </span>
-            </div>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 6, marginTop: 9 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--ah-faint)', letterSpacing: 0.3 }}>Wallet ID</span>
-              <span style={{ fontSize: 12, fontWeight: 700, fontFamily: 'ui-monospace, monospace', color: 'var(--ah-ink)' }}>AIH-2480-SNT</span>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                <rect x="9" y="9" width="11" height="11" rx="2.5" stroke="var(--ah-faint)" strokeWidth="1.8" />
-                <path d="M5 15V5h10" stroke="var(--ah-faint)" strokeWidth="1.8" strokeLinecap="round" />
-              </svg>
-            </div>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', gap: 8, marginTop: 8 }}>
-              <span style={{ fontSize: 38, fontWeight: 800, letterSpacing: -1, lineHeight: 0.9 }}>2,480</span>
-              <span style={{ fontSize: 13, color: 'var(--ah-muted)', fontWeight: 600, marginBottom: 5 }}>pts</span>
-            </div>
-            <div style={{ position: 'relative', marginTop: 13, height: 6, borderRadius: 99, background: 'var(--ah-line)', overflow: 'hidden' }}>
-              <div style={{ width: '62%', height: '100%', borderRadius: 99, background: 'linear-gradient(90deg, color-mix(in oklch, var(--ah-orange) 55%, white), var(--ah-orange))' }} />
-            </div>
-            <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', marginTop: 7, fontSize: 11.5, color: 'var(--ah-muted)' }}>
-              <span>~620 questions left</span>
-              <span>4 pts / answer</span>
-            </div>
-            <div
-              onClick={() => nav.go('recharge')}
-              style={{ position: 'relative', marginTop: 13, height: 42, borderRadius: 99, background: '#1B1B1F', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <View
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: 30,
+              borderWidth: 2.5,
+              borderColor: ACCENT,
+              padding: 2,
+              flexShrink: 0,
+            }}
+          >
+            <View
+              style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: 30,
+                backgroundColor: ACCENT + '38',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
-              <AHCoin size={17} /> Recharge points
-            </div>
-          </div>
+              <Text
+                style={{
+                  color: ACCENT,
+                  fontFamily: AH_BRAND_FONT,
+                  fontWeight: '800',
+                  fontSize: 22,
+                }}
+              >
+                S
+              </Text>
+            </View>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{ fontSize: 20, fontWeight: '700', letterSpacing: -0.3, color: INK }}
+            >
+              Sunita Shrestha
+            </Text>
+            <Text style={{ fontSize: 13, color: MUTED, marginTop: 1 }}>
+              {'+977 98XXXXXXXX · Lalitpur'}
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => nav.go('personal')}
+            style={{
+              backgroundColor: ACCENT_SOFT,
+              borderRadius: 99,
+              paddingHorizontal: 14,
+              paddingVertical: 7,
+            }}
+          >
+            <Text style={{ fontSize: 12.5, fontWeight: '700', color: ACCENT }}>Edit</Text>
+          </Pressable>
+        </View>
 
-          {/* business wallet */}
-          <div style={{ flex: '0 0 auto', width: 224, borderRadius: 22, background: '#fff', padding: '16px 18px', border: '1.5px solid var(--ah-line)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'color-mix(in oklch, #3A6FE0 16%, white)', color: '#3A6FE0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: AH_BRAND_FONT, fontWeight: 800, fontSize: 11 }}>
-                श
-              </div>
-              <span style={{ fontSize: 13, color: 'var(--ah-muted)', fontWeight: 600 }}>Shrestha Kirana</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 9 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--ah-faint)', letterSpacing: 0.3 }}>Wallet ID</span>
-              <span style={{ fontSize: 12, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>AIH-0940-SKP</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, marginTop: 8 }}>
-              <span style={{ fontSize: 32, fontWeight: 800, letterSpacing: -0.8, lineHeight: 0.9 }}>940</span>
-              <span style={{ fontSize: 12, color: 'var(--ah-muted)', fontWeight: 600, marginBottom: 4 }}>pts</span>
-            </div>
-            <div style={{ marginTop: 14, height: 38, borderRadius: 99, border: '1.5px solid var(--ah-line2)', color: 'var(--ah-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontSize: 13.5, fontWeight: 700 }}>
-              Top up
-            </div>
-          </div>
-
-          {/* add wallet */}
-          <div style={{ flex: '0 0 auto', width: 130, borderRadius: 22, border: '1.5px dashed var(--ah-line2)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 9, color: 'var(--ah-muted)' }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--ah-bg-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-              </svg>
-            </div>
-            <span style={{ fontSize: 12.5, fontWeight: 700 }}>Add wallet</span>
-          </div>
-        </div>
+        {/* wallets — uniform compact cards */}
+        <SectionHeader
+          title="Wallets"
+          action={
+            <Pressable onPress={() => nav.go('recharge')}>
+              <Text style={{ fontSize: 12.5, fontWeight: '700', color: ACCENT }}>
+                Recharge
+              </Text>
+            </Pressable>
+          }
+        />
+        <View style={{ height: WALLET_H + 10, marginHorizontal: -20 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 20, gap: 10, alignItems: 'center' }}
+          >
+            {wallets.map((w) => (
+              <WalletCard key={w.id} w={w} onTopUp={() => nav.go('recharge')} />
+            ))}
+            <AddWalletCard onPress={() => nav.go('recharge')} />
+          </ScrollView>
+        </View>
 
         {/* your businesses */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', margin: '20px 2px 10px' }}>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>Your businesses</span>
-          <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ah-orange)' }}>+ Add</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-          {(
-            [
-              ['प', 'Shrestha Kirana Pasal', '142 products · Lagankhel'],
-              ['कप', 'Sunita Fashion', '38 products · Pulchowk'],
-            ] as Array<[string, string, string]>
-          ).map(([g, n, s]) => (
-            <div key={n} onClick={() => nav.go('businessPage')} style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '6px 2px', cursor: 'pointer' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 13, background: '#fff', color: 'var(--ah-orange)', fontFamily: AH_BRAND_FONT, fontWeight: 800, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px -4px rgba(20,20,25,0.18)' }}>
-                {g}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14.5, fontWeight: 700 }}>{n}</div>
-                <div style={{ fontSize: 12, color: 'var(--ah-muted)', marginTop: 1 }}>{s}</div>
-              </div>
-              <svg width="8" height="13" viewBox="0 0 8 14">
-                <path d="M1 1l5.5 6L1 13" stroke="#C2B49A" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
+        <SectionHeader
+          title="Your business"
+          action={
+            <Pressable onPress={() => nav.go('addBusiness')}>
+              <Text style={{ fontSize: 12.5, fontWeight: '700', color: ACCENT }}>
+                + Add
+              </Text>
+            </Pressable>
+          }
+        />
+        <Card>
+          {businesses.map(([g, n, s], i) => (
+            <Pressable
+              key={n}
+              onPress={() => nav.go('businessDashboard')}
+              android_ripple={RIPPLE}
+              style={pressedOpacity({
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 13,
+                padding: 12,
+                paddingHorizontal: 14,
+                borderTopWidth: i ? 1 : 0,
+                borderTopColor: LINE,
+              })}
+            >
+              <View
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  backgroundColor: mixWithWhite(ACCENT, 0.14),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Text
+                  style={{
+                    color: ACCENT,
+                    fontFamily: AH_BRAND_FONT,
+                    fontWeight: '800',
+                    fontSize: 14,
+                  }}
+                >
+                  {g}
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14.5, fontWeight: '700', color: INK }}>{n}</Text>
+                <Text style={{ fontSize: 12, color: MUTED, marginTop: 1 }}>{s}</Text>
+              </View>
+              <Svg width={8} height={13} viewBox="0 0 8 14">
+                <Path
+                  d="M1 1l5.5 6L1 13"
+                  stroke="#C2B49A"
+                  strokeWidth={2}
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
           ))}
-        </div>
+        </Card>
 
-        {/* settings menu */}
-        <div style={{ marginTop: 14, borderRadius: 20, background: '#fff', overflow: 'hidden', boxShadow: '0 4px 14px -10px rgba(20,20,25,0.22)' }}>
-          {menu.map(([t, s, d], i) => (
-            <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 15px', borderTop: i ? '1px solid var(--ah-line)' : 'none' }}>
-              <div style={{ width: 36, height: 36, borderRadius: 11, background: 'color-mix(in oklch, var(--ah-orange) 13%, white)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d={d} stroke="var(--ah-orange)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14.5, fontWeight: 600 }}>{t}</div>
-                <div style={{ fontSize: 12, color: 'var(--ah-muted)', marginTop: 1 }}>{s}</div>
-              </div>
-              <svg width="7" height="12" viewBox="0 0 8 14">
-                <path d="M1 1l5.5 6L1 13" stroke="#C2B49A" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
+        {/* payment */}
+        <SectionHeader
+          title="Payment"
+          action={
+            <Pressable onPress={() => nav.go('recharge')}>
+              <Text style={{ fontSize: 12.5, fontWeight: '700', color: ACCENT }}>
+                Manage
+              </Text>
+            </Pressable>
+          }
+        />
+        <Card>
+          {payments.map(([name, sub, c, g], i) => (
+            <Pressable
+              key={name}
+              onPress={() => nav.go('recharge')}
+              android_ripple={RIPPLE}
+              style={pressedOpacity({
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 13,
+                padding: 12,
+                paddingHorizontal: 14,
+                borderTopWidth: i ? 1 : 0,
+                borderTopColor: LINE,
+              })}
+            >
+              <View
+                style={{
+                  width: 40,
+                  height: 28,
+                  borderRadius: 8,
+                  backgroundColor: mixWithWhite(c, 0.14),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Text
+                  style={{
+                    color: c,
+                    fontFamily: AH_BRAND_FONT,
+                    fontWeight: '800',
+                    fontSize: 14,
+                  }}
+                >
+                  {g}
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: INK }}>{name}</Text>
+                <Text style={{ fontSize: 11.5, color: MUTED, marginTop: 1 }}>{sub}</Text>
+              </View>
+              <Svg width={7} height={12} viewBox="0 0 8 14">
+                <Path
+                  d="M1 1l5.5 6L1 13"
+                  stroke="#C2B49A"
+                  strokeWidth={2}
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </Pressable>
           ))}
-        </div>
-        <div style={{ minHeight: 16 }} />
-      </div>
+        </Card>
+
+        {/* personal information */}
+        <SectionHeader
+          title="Personal information"
+          action={
+            <Pressable onPress={() => nav.go('personal')}>
+              <Text style={{ fontSize: 12.5, fontWeight: '700', color: ACCENT }}>
+                Edit
+              </Text>
+            </Pressable>
+          }
+        />
+        <Card>
+          <Row
+            onPress={() => nav.go('personal')}
+            title="Sunita Shrestha"
+            sub="Full name"
+            icon={
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Circle cx={12} cy={9} r={3.6} stroke={ACCENT} strokeWidth={1.8} />
+                <Path d="M5 20a7 7 0 0 1 14 0" stroke={ACCENT} strokeWidth={1.8} strokeLinecap="round" />
+              </Svg>
+            }
+          />
+          <View style={{ height: 1, backgroundColor: LINE }} />
+          <Row
+            onPress={() => nav.go('personal')}
+            title="+977 98XXXXXXXX"
+            sub="Mobile · Verified"
+            icon={
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Rect x="6" y="3" width="12" height="18" rx="3" stroke={ACCENT} strokeWidth={1.8} />
+                <Path d="M11 17h2" stroke={ACCENT} strokeWidth={1.8} strokeLinecap="round" />
+              </Svg>
+            }
+            trailing={
+              <View
+                style={{
+                  backgroundColor: GREEN + '20',
+                  borderRadius: 99,
+                  paddingHorizontal: 9,
+                  paddingVertical: 3,
+                }}
+              >
+                <Text style={{ fontSize: 10.5, fontWeight: '800', color: GREEN }}>OK</Text>
+              </View>
+            }
+          />
+          <View style={{ height: 1, backgroundColor: LINE }} />
+          <Row
+            onPress={() => nav.go('personal')}
+            title="Lalitpur"
+            sub="District"
+            icon={
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M12 21s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z"
+                  stroke={ACCENT}
+                  strokeWidth={1.8}
+                  strokeLinejoin="round"
+                />
+                <Circle cx={12} cy={9} r={2.4} stroke={ACCENT} strokeWidth={1.8} />
+              </Svg>
+            }
+          />
+          <View style={{ height: 1, backgroundColor: LINE }} />
+          <Row
+            onPress={() => nav.go('language')}
+            title="नेपाली · English"
+            sub="Language"
+            icon={
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M4 5h16M9 5c0 6-2.5 10-5 12M7 9c1 3 4 5 8 6"
+                  stroke={ACCENT}
+                  strokeWidth={1.8}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            }
+          />
+          <View style={{ height: 1, backgroundColor: LINE }} />
+          <Row
+            title="Privacy & data"
+            sub="Personal and business kept separate"
+            icon={
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M12 3l7 3v6c0 4-3 7-7 8-4-1-7-4-7-8V6z"
+                  stroke={ACCENT}
+                  strokeWidth={1.8}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            }
+          />
+        </Card>
+
+        {/* notifications — debug & test */}
+        <SectionHeader
+          title="Notifications"
+          action={
+            <Pressable onPress={fireTest} android_ripple={RIPPLE} hitSlop={6}>
+              <Text style={{ fontSize: 12.5, fontWeight: '700', color: ACCENT }}>
+                Send test
+              </Text>
+            </Pressable>
+          }
+        />
+        <Card>
+          <View style={{ padding: 14 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                marginBottom: 6,
+              }}
+            >
+              <View
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: token ? GREEN : FAINT,
+                }}
+              />
+              <Text
+                style={{
+                  fontSize: 11,
+                  fontWeight: '700',
+                  color: token ? GREEN : MUTED,
+                  letterSpacing: 0.4,
+                  textTransform: 'uppercase',
+                }}
+              >
+                {token ? 'Push enabled' : 'Waiting for token'}
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontSize: 12,
+                color: INK,
+                fontFamily: 'Menlo',
+                lineHeight: 16,
+              }}
+              numberOfLines={2}
+              selectable
+            >
+              {token ?? 'ExponentPushToken[…] will appear after permission is granted in a dev/prod build.'}
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 8,
+                marginTop: 12,
+              }}
+            >
+              <Pressable
+                onPress={fireTest}
+                android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: false }}
+                style={pressedOpacity({
+                  flex: 1,
+                  backgroundColor: INK,
+                  borderRadius: 99,
+                  paddingVertical: 10,
+                  alignItems: 'center',
+                })}
+              >
+                <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>
+                  Fire local test
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={copyToken}
+                disabled={!token}
+                android_ripple={RIPPLE}
+                style={pressedOpacity({
+                  flex: 1,
+                  backgroundColor: token ? BG_SOFT : BG_SOFT,
+                  borderRadius: 99,
+                  paddingVertical: 10,
+                  alignItems: 'center',
+                  borderWidth: 1.5,
+                  borderColor: LINE2,
+                  opacity: token ? 1 : 0.5,
+                })}
+              >
+                <Text style={{ fontSize: 13, fontWeight: '700', color: INK }}>
+                  Copy token
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </Card>
+
+        <View style={{ height: 24 }} />
+      </ScrollView>
       <AHTabBar active="profile" />
     </AHScreen>
   );

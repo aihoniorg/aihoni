@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#3B76EF" />
+  <title>aihoni · नेपालका लागि बनेको AI साथी</title>
+  <meta name="description" content="aihoni is the AI companion for Nepali small businesses — chat, voice, and a smart inbox in Nepali and English." />
+  <link rel="icon" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/icon.png" />
+  <meta property="og:title" content="aihoni." />
+  <meta property="og:description" content="AI साथी for your pasal — chat, voice, smart orders." />
+  <meta property="og:image" content="https://aihoni.com/og.png" />
+  <meta property="og:url" content="https://aihoni.com" />
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --ink:#1B1B1F; --accent:#3B76EF; --muted:#8A8A8E; --bg:#fff; --soft:#F6F6F6;
+      --accent-soft:#E7EEFD;
+    }
+    html,body{height:100%}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      color:var(--ink); background:var(--bg);
+      -webkit-font-smoothing:antialiased; line-height:1.4;
+    }
+    .hero{
+      min-height:100vh; display:flex; flex-direction:column;
+      padding:24px 22px; max-width:520px; margin:0 auto;
+    }
+    .top{display:flex; align-items:center; justify-content:space-between; padding-top:8px}
+    .brand{
+      font-family:'Baloo 2','Inter',sans-serif; font-weight:800;
+      font-size:24px; letter-spacing:-0.3px;
+    }
+    .brand .dot{color:var(--accent)}
+    .nav-link{
+      font-size:13px; font-weight:600; color:var(--muted); text-decoration:none;
+    }
+    main{flex:1; display:flex; flex-direction:column; justify-content:center; gap:18px; padding:32px 0}
+    .icon{
+      width:96px; height:96px; border-radius:24px; align-self:flex-start;
+      background:#1a1d2e; display:flex; align-items:center; justify-content:center;
+      box-shadow:0 12px 30px rgba(59,118,239,0.30);
+    }
+    .icon svg{width:48px; height:48px}
+    h1{
+      font-size:44px; line-height:1.04; letter-spacing:-1.2px; font-weight:800;
+    }
+    h1 .accent{color:var(--accent)}
+    p.lead{
+      font-size:17px; color:var(--muted); line-height:1.45; max-width:420px;
+    }
+    .ctas{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+    .btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:14px 22px; border-radius:999px;
+      font-size:15px; font-weight:700; text-decoration:none;
+      transition:transform .12s ease, box-shadow .12s ease;
+    }
+    .btn:active{transform:scale(0.98)}
+    .btn.primary{background:var(--ink); color:#fff}
+    .btn.outline{background:#fff; color:var(--ink); border:1.5px solid #E6E6E6}
+    .features{display:flex; flex-direction:column; gap:14px; margin-top:36px}
+    .feature{
+      display:flex; gap:14px; padding:14px; border-radius:16px;
+      background:var(--soft);
+    }
+    .feature .ic{
+      width:38px; height:38px; border-radius:11px; background:var(--accent-soft);
+      color:var(--accent); display:flex; align-items:center; justify-content:center;
+      flex-shrink:0; font-weight:800;
+    }
+    .feature h3{font-size:14.5px; font-weight:700}
+    .feature p{font-size:13px; color:var(--muted); margin-top:2px}
+    footer{
+      padding:24px 0; color:var(--muted); font-size:12px;
+      display:flex; justify-content:space-between; align-items:center;
+      border-top:1px solid #EFECEC; margin-top:32px;
+    }
+    footer a{color:var(--muted); text-decoration:none; margin-left:14px}
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="top">
+      <div class="brand">aihoni<span class="dot">.</span></div>
+      <a class="nav-link" href="mailto:hello@aihoni.com">Contact</a>
+    </div>
+
+    <main>
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="9" y="3" width="6" height="11" rx="3" fill="#fff"/>
+          <path d="M6 11.5a6 6 0 0 0 12 0M12 17.5V21" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1>तपाईंको पसलको <span class="accent">AI साथी</span>.</h1>
+      <p class="lead">
+        Ask anything — in your own voice, in your own language.
+        For you and your pasal.
+      </p>
+      <div class="ctas">
+        <a class="btn primary" href="https://apps.apple.com/app/aihoni" rel="noopener">
+          Download for iOS
+        </a>
+        <a class="btn outline" href="https://play.google.com/store/apps/details?id=com.nepfinder.aihoni" rel="noopener">
+          Get on Play Store
+        </a>
+      </div>
+
+      <div class="features">
+        <div class="feature">
+          <div class="ic">🎤</div>
+          <div>
+            <h3>Voice-first</h3>
+            <p>Talk in Nepali or English — no typing needed.</p>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="ic">🏪</div>
+          <div>
+            <h3>For every pasal</h3>
+            <p>Manage products, orders, payments — all in one inbox.</p>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="ic">⚡</div>
+          <div>
+            <h3>Smart answers</h3>
+            <p>Knows your prices, stock, and customers automatically.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <span>© aihoni · Made in Nepal 🇳🇵</span>
+      <span>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+      </span>
+    </footer>
+  </div>
+</body>
+</html>

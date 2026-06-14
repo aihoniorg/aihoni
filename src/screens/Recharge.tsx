@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { AHScreen, AHButton, AHCoin } from '../components/ui';
-import { AH_BRAND_FONT } from '../theme';
+import { View, Text, ScrollView, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AHScreen, AHHeader, AHButton, AHCoin, RIPPLE, pressedOpacity } from '../components/ui';
+import { AH_BRAND_FONT, INK, ACCENT, MUTED, LINE, LINE2, FAINT, BG_SOFT, mixWithWhite } from '../theme';
 import { useNav } from '../nav';
+import Svg, { Path } from 'react-native-svg';
 
 interface Pack {
   pts: string;
@@ -10,9 +13,10 @@ interface Pack {
   popular?: boolean;
 }
 
-// 21 · Recharge points — TikTok-style coin packs + Nepali gateways.
+// 22 · Recharge points — TikTok-style coin packs + Nepali gateways.
 export function Recharge() {
   const nav = useNav();
+  const insets = useSafeAreaInsets();
   const [pack, setPack] = useState(2);
   const [method, setMethod] = useState('esewa');
   const packs: Pack[] = [
@@ -35,143 +39,270 @@ export function Recharge() {
 
   return (
     <AHScreen pad={false}>
-      {/* header */}
-      <div style={{ padding: '56px 18px 10px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <svg onClick={nav.back} width="22" height="22" viewBox="0 0 24 24" fill="none" style={{ cursor: 'pointer' }}>
-          <path d="M14 6l-6 6 6 6" stroke="var(--ah-ink)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <div style={{ flex: 1, fontSize: 18, fontWeight: 700 }}>Recharge points</div>
-        <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ah-muted)' }}>History</div>
-      </div>
+      <AHHeader
+        title="Recharge points"
+        back
+        right={
+          <Pressable onPress={() => {}}>
+            <Text style={{ fontSize: 12.5, fontWeight: '700', color: MUTED }}>
+              History
+            </Text>
+          </Pressable>
+        }
+      />
 
-      <div className="ah-scroll" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', padding: '0 18px' }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: 8 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* balance card */}
-        <div style={{ borderRadius: 20, background: '#1B1B1F', color: '#fff', padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 13, position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', right: -28, top: -28, width: 120, height: 120, borderRadius: '50%', background: 'var(--ah-orange)', opacity: 0.5, filter: 'blur(30px)' }} />
+        <View
+          style={{
+            borderRadius: 20,
+            backgroundColor: INK,
+            padding: 16,
+            paddingHorizontal: 18,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 13,
+            overflow: 'hidden',
+          }}
+        >
           <AHCoin size={38} />
-          <div style={{ flex: 1, position: 'relative' }}>
-            <div style={{ fontSize: 12.5, opacity: 0.7 }}>Current balance</div>
-            <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, marginTop: 1 }}>
-              2,480 <span style={{ fontSize: 13, fontWeight: 600, opacity: 0.7 }}>pts</span>
-            </div>
-          </div>
-          <div style={{ position: 'relative', fontSize: 11.5, fontWeight: 700, background: 'rgba(255,255,255,0.16)', borderRadius: 99, padding: '6px 12px' }}>≈ रू 2,480</div>
-        </div>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.7)' }}>
+              Current balance
+            </Text>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: '800',
+                letterSpacing: -0.5,
+                marginTop: 1,
+                color: '#fff',
+              }}
+            >
+              {'2,480 '}
+              <Text style={{ fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.7)' }}>
+                pts
+              </Text>
+            </Text>
+          </View>
+          <View
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.16)',
+              borderRadius: 99,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+            }}
+          >
+            <Text style={{ fontSize: 11.5, fontWeight: '700', color: '#fff' }}>
+              {'≈ रू 2,480'}
+            </Text>
+          </View>
+        </View>
 
         {/* pack grid */}
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ah-muted)', margin: '16px 2px 9px' }}>Choose a pack</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 9 }}>
+        <Text
+          style={{
+            fontSize: 13,
+            fontWeight: '700',
+            color: MUTED,
+            marginTop: 16,
+            marginBottom: 9,
+            marginLeft: 2,
+          }}
+        >
+          Choose a pack
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 9 }}>
           {packs.map((p, i) => {
             const on = i === pack;
             return (
-              <div
+              <Pressable
                 key={i}
-                onClick={() => setPack(i)}
-                style={{
+                onPress={() => setPack(i)}
+                android_ripple={RIPPLE}
+                style={pressedOpacity({
                   position: 'relative',
+                  width: '31%',
                   borderRadius: 16,
-                  padding: '14px 6px 11px',
-                  background: on ? 'var(--ah-bg-soft)' : '#fff',
-                  border: on ? '2px solid #1B1B1F' : '2px solid var(--ah-line2)',
-                  display: 'flex',
+                  paddingTop: 14,
+                  paddingBottom: 11,
+                  paddingHorizontal: 6,
+                  backgroundColor: on ? BG_SOFT : '#fff',
+                  borderWidth: 2,
+                  borderColor: on ? INK : LINE2,
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: 5,
-                  cursor: 'pointer',
-                }}
+                })}
               >
                 {p.popular && (
-                  <span style={{ position: 'absolute', top: -9, left: '50%', transform: 'translateX(-50%)', fontSize: 9, fontWeight: 800, color: '#fff', background: 'var(--ah-orange)', borderRadius: 99, padding: '2px 8px', whiteSpace: 'nowrap' }}>
-                    POPULAR
-                  </span>
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: -9,
+                      alignSelf: 'center',
+                      backgroundColor: ACCENT,
+                      borderRadius: 99,
+                      paddingHorizontal: 8,
+                      paddingVertical: 2,
+                    }}
+                  >
+                    <Text
+                      style={{ fontSize: 9, fontWeight: '800', color: '#fff' }}
+                    >
+                      POPULAR
+                    </Text>
+                  </View>
                 )}
                 <AHCoin size={26} />
-                <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{p.pts}</div>
+                <Text
+                  style={{ fontSize: 15, fontWeight: '800', letterSpacing: -0.3, color: INK }}
+                >
+                  {p.pts}
+                </Text>
                 {p.bonus ? (
-                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ah-orange)' }}>{p.bonus} bonus</div>
+                  <Text style={{ fontSize: 10, fontWeight: '700', color: ACCENT }}>
+                    {p.bonus} bonus
+                  </Text>
                 ) : (
-                  <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--ah-faint)' }}>points</div>
+                  <Text style={{ fontSize: 10, fontWeight: '600', color: FAINT }}>points</Text>
                 )}
-                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ah-ink)', marginTop: 2 }}>रू {p.price}</div>
-              </div>
+                <Text style={{ fontSize: 12, fontWeight: '700', color: INK, marginTop: 2 }}>
+                  {'रू ' + p.price}
+                </Text>
+              </Pressable>
             );
           })}
-        </div>
+        </View>
 
         {/* payment method */}
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', margin: '16px 2px 9px' }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ah-muted)' }}>Pay with</span>
-          <span style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--ah-faint)' }}>Nepali gateways</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            marginTop: 16,
+            marginBottom: 9,
+            marginHorizontal: 2,
+          }}
+        >
+          <Text style={{ fontSize: 13, fontWeight: '700', color: MUTED }}>Pay with</Text>
+          <Text style={{ fontSize: 11.5, fontWeight: '600', color: FAINT }}>
+            Nepali gateways
+          </Text>
+        </View>
+        <View style={{ flexDirection: 'column', gap: 8 }}>
           {methods.map((m) => {
             const on = m.id === method;
             return (
-              <div
+              <Pressable
                 key={m.id}
-                onClick={() => setMethod(m.id)}
-                style={{
-                  display: 'flex',
+                onPress={() => setMethod(m.id)}
+                android_ripple={RIPPLE}
+                style={pressedOpacity({
+                  flexDirection: 'row',
                   alignItems: 'center',
                   gap: 12,
-                  padding: '9px 13px',
+                  padding: 9,
+                  paddingHorizontal: 13,
                   borderRadius: 14,
-                  cursor: 'pointer',
-                  background: '#fff',
-                  border: on ? '2px solid #1B1B1F' : '2px solid var(--ah-line2)',
-                }}
+                  backgroundColor: '#fff',
+                  borderWidth: 2,
+                  borderColor: on ? INK : LINE2,
+                })}
               >
-                <div
+                <View
                   style={{
                     width: 56,
                     height: 34,
                     borderRadius: 8,
                     flexShrink: 0,
-                    background: `color-mix(in oklch, ${m.c} 14%, white)`,
-                    color: m.c,
-                    fontFamily: AH_BRAND_FONT,
-                    fontWeight: 800,
-                    fontSize: 18,
-                    display: 'flex',
+                    backgroundColor: mixWithWhite(m.c, 0.14),
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
-                  {m.g}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700 }}>{m.name}</div>
-                  <div style={{ fontSize: 11.5, color: 'var(--ah-muted)', marginTop: 1 }}>{m.sub}</div>
-                </div>
-                <div style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0, border: on ? 'none' : '2px solid var(--ah-line2)', background: on ? '#1B1B1F' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text
+                    style={{
+                      color: m.c,
+                      fontFamily: AH_BRAND_FONT,
+                      fontWeight: '800',
+                      fontSize: 18,
+                    }}
+                  >
+                    {m.g}
+                  </Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '700', color: INK }}>{m.name}</Text>
+                  <Text style={{ fontSize: 11.5, color: MUTED, marginTop: 1 }}>{m.sub}</Text>
+                </View>
+                <View
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    flexShrink: 0,
+                    borderWidth: on ? 0 : 2,
+                    borderColor: LINE2,
+                    backgroundColor: on ? INK : 'transparent',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
                   {on && (
-                    <svg width="10" height="8" viewBox="0 0 12 10">
-                      <path d="M1 5l3.2 3.4L11 1" stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <Svg width={10} height={8} viewBox="0 0 12 10">
+                      <Path
+                        d="M1 5l3.2 3.4L11 1"
+                        stroke="#fff"
+                        strokeWidth={2.4}
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
                   )}
-                </div>
-              </div>
+                </View>
+              </Pressable>
             );
           })}
-        </div>
-        <div style={{ minHeight: 14 }} />
-      </div>
+        </View>
+        <View style={{ height: 14 }} />
+      </ScrollView>
 
       {/* footer pay bar */}
-      <div style={{ padding: '12px 18px 26px', borderTop: '1px solid var(--ah-line)', display: 'flex', alignItems: 'center', gap: 14, background: '#fff' }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 11.5, color: 'var(--ah-muted)' }}>
+      <View
+        style={{
+          paddingHorizontal: 18,
+          paddingTop: 12,
+          paddingBottom: Math.max(insets.bottom, 26),
+          borderTopWidth: 1,
+          borderTopColor: LINE,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 14,
+          backgroundColor: '#fff',
+        }}
+      >
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 11.5, color: MUTED }}>
             {sel.pts}
             {sel.bonus ? ` ${sel.bonus}` : ''} points
-          </div>
-          <div style={{ fontSize: 21, fontWeight: 800, letterSpacing: -0.5 }}>रू {sel.price}</div>
-        </div>
-        <div style={{ flex: '0 0 auto' }}>
-          <AHButton kind="primary" style={{ padding: '0 26px' }}>
-            Recharge now
-          </AHButton>
-        </div>
-      </div>
+          </Text>
+          <Text
+            style={{ fontSize: 21, fontWeight: '800', letterSpacing: -0.5, color: INK }}
+          >
+            {'रू ' + sel.price}
+          </Text>
+        </View>
+        <AHButton kind="primary" style={{ paddingHorizontal: 26 }}>
+          Recharge now
+        </AHButton>
+      </View>
     </AHScreen>
   );
 }

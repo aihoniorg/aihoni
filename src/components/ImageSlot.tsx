@@ -1,8 +1,5 @@
-import type { CSSProperties } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
-// Stand-in for the design tool's <image-slot> custom element. In the prototype
-// these were drag-and-drop media targets; here they render a neutral
-// placeholder with the original prompt text so layouts stay faithful.
 export function ImageSlot({
   shape = 'rect',
   placeholder = '',
@@ -10,27 +7,32 @@ export function ImageSlot({
 }: {
   shape?: 'rect' | 'circle';
   placeholder?: string;
-  style?: CSSProperties;
+  style?: object;
 }) {
-  const label = placeholder.trim();
   return (
-    <div
-      style={{
-        background: 'repeating-linear-gradient(45deg, #f3f3f5 0 10px, #ededf0 10px 20px)',
-        color: '#9a9aa0',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        fontSize: 11,
-        fontWeight: 600,
-        padding: 8,
-        boxSizing: 'border-box',
-        borderRadius: shape === 'circle' ? '50%' : undefined,
-        ...style,
-      }}
+    <View
+      style={[styles.base, shape === 'circle' && { borderRadius: 9999 }, style]}
     >
-      {label && <span style={{ opacity: 0.8, lineHeight: 1.3 }}>{label}</span>}
-    </div>
+      {placeholder.trim() ? (
+        <Text style={styles.label}>{placeholder.trim()}</Text>
+      ) : null}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  base: {
+    backgroundColor: '#ededf0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+  },
+  label: {
+    color: '#9a9aa0',
+    fontSize: 11,
+    fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 15,
+    opacity: 0.8,
+  },
+});
