@@ -2,10 +2,14 @@ import { View, Text } from 'react-native';
 import { AHScreen, AHProgress, AHTitle, AHField, AHButton } from '../components/ui';
 import { INK, BG_SOFT, MUTED } from '../theme';
 import { useNav } from '../nav';
+import { useAuth } from '../auth';
 
 // 04 · Personal info — kept clearly separate from business data.
 export function Personal() {
   const nav = useNav();
+  const { user } = useAuth();
+  // Pre-fill from the Google profile if we have one; otherwise sample placeholders.
+  const prefillName = user?.name ?? 'Sunita Shrestha';
   return (
     <AHScreen>
       <AHProgress step={2} />
@@ -15,7 +19,7 @@ export function Personal() {
         sub="Just the basics. Your personal details stay private — and separate from your stores."
       />
       <View style={{ flexDirection: 'column', gap: 16 }}>
-        <AHField label="Full name" value="Sunita Shrestha" />
+        <AHField label="Full name" value={prefillName} />
         <AHField
           label="Mobile number"
           value="+977 98XXXXXXXX"

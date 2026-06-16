@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert, Image } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AHScreen, AHTabBar, AHCoin, RIPPLE, pressedOpacity } from '../components/ui';
 import { AH_BRAND_FONT, INK, ACCENT, MUTED, LINE, LINE2, FAINT, BG_SOFT, ACCENT_SOFT, GREEN, mixWithWhite } from '../theme';
 import { useNav } from '../nav';
+import { useAuth } from '../auth';
 import { getPushToken, sendLocalTestNotification } from '../notifications';
+import { pickAndUploadImage } from '../imageUpload';
+import { api, ApiError } from '../apiClient';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import type { ReactNode } from 'react';
 
@@ -383,8 +386,51 @@ function AddWalletCard({ onPress }: { onPress: () => void }) {
 // 21 · Profile — identity, wallets, businesses, payment, personal information.
 export function Profile() {
   const nav = useNav();
+  const { user, signOut } = useAuth();
   const insets = useSafeAreaInsets();
   const [token, setToken] = useState<string | null>(getPushToken());
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar_url ?? user?.picture ?? null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const changeAvatar = async () => {
+    setAvatarUploading(true);
+    try {
+      const media = await pickAndUploadImage({ aspect: [1, 1], quality: 0.8 });
+      if (!media) return;
+      setAvatarUrl(media.url);
+      try {
+        await api('/api/auth/me', { method: 'PATCH', body: { avatar_key: media.key } });
+      } catch (e) {
+        Alert.alert(
+          'Avatar saved locally',
+          e instanceof ApiError && e.status === 401
+            ? 'Sign in to save your avatar to your account.'
+            : 'Could not save avatar to your profile right now.',
+        );
+      }
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  // Derived display values (fallback to sample when not signed in).
+  const displayName = user?.name ?? 'Sunita Shrestha';
+  const displayEmail = user?.email;
+  const displayInitial = (user?.name?.trim()?.[0] ?? 'S').toUpperCase();
+
+  const handleLogout = () => {
+    Alert.alert('Log out', 'You will be returned to the sign-in screen.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Log out',
+        style: 'destructive',
+        onPress: async () => {
+          await signOut();
+          nav.reset('welcome');
+        },
+      },
+    ]);
+  };
 
   // Poll briefly for the token (registration completes async on app start).
   useEffect(() => {
@@ -447,8 +493,11 @@ export function Profile() {
       >
         {/* profile header */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-          <View
-            style={{
+          <Pressable
+            onPress={changeAvatar}
+            disabled={avatarUploading}
+            android_ripple={RIPPLE}
+            style={pressedOpacity({
               width: 60,
               height: 60,
               borderRadius: 30,
@@ -456,7 +505,8 @@ export function Profile() {
               borderColor: ACCENT,
               padding: 2,
               flexShrink: 0,
-            }}
+              opacity: avatarUploading ? 0.6 : 1,
+            })}
           >
             <View
               style={{
@@ -466,28 +516,34 @@ export function Profile() {
                 backgroundColor: ACCENT + '38',
                 alignItems: 'center',
                 justifyContent: 'center',
+                overflow: 'hidden',
               }}
             >
-              <Text
-                style={{
-                  color: ACCENT,
-                  fontFamily: AH_BRAND_FONT,
-                  fontWeight: '800',
-                  fontSize: 22,
-                }}
-              >
-                S
-              </Text>
+              {avatarUrl ? (
+                <Image source={{ uri: avatarUrl }} style={{ width: '100%', height: '100%' }} />
+              ) : (
+                <Text
+                  style={{
+                    color: ACCENT,
+                    fontFamily: AH_BRAND_FONT,
+                    fontWeight: '800',
+                    fontSize: 22,
+                  }}
+                >
+                  {displayInitial}
+                </Text>
+              )}
             </View>
-          </View>
+          </Pressable>
           <View style={{ flex: 1 }}>
             <Text
               style={{ fontSize: 20, fontWeight: '700', letterSpacing: -0.3, color: INK }}
+              numberOfLines={1}
             >
-              Sunita Shrestha
+              {displayName}
             </Text>
-            <Text style={{ fontSize: 13, color: MUTED, marginTop: 1 }}>
-              {'+977 98XXXXXXXX · Lalitpur'}
+            <Text style={{ fontSize: 13, color: MUTED, marginTop: 1 }} numberOfLines={1}>
+              {displayEmail ?? '+977 98XXXXXXXX · Lalitpur'}
             </Text>
           </View>
           <Pressable
@@ -857,6 +913,50 @@ export function Profile() {
             </View>
           </View>
         </Card>
+
+        {/* log out */}
+        <View style={{ marginTop: 22 }}>
+          <Pressable
+            onPress={handleLogout}
+            android_ripple={RIPPLE}
+            style={pressedOpacity({
+              backgroundColor: '#fff',
+              borderRadius: 18,
+              borderWidth: 1.5,
+              borderColor: '#F1D5D5',
+              paddingVertical: 14,
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'row',
+              gap: 9,
+            })}
+          >
+            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M15 12H4M4 12l4-4M4 12l4 4M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"
+                stroke="#D14836"
+                strokeWidth={1.9}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+            <Text style={{ fontSize: 14.5, fontWeight: '700', color: '#D14836' }}>
+              Log out
+            </Text>
+          </Pressable>
+          {user?.email && (
+            <Text
+              style={{
+                fontSize: 11.5,
+                color: MUTED,
+                textAlign: 'center',
+                marginTop: 8,
+              }}
+            >
+              Signed in as {user.email}
+            </Text>
+          )}
+        </View>
 
         <View style={{ height: 24 }} />
       </ScrollView>

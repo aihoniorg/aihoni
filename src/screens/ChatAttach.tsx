@@ -1,14 +1,59 @@
-import { View, Text, Pressable } from 'react-native';
+import { useState } from 'react';
+import { View, Text, Pressable, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AHScreen, AHChatInput, RIPPLE, RIPPLE_ICON, pressedOpacity } from '../components/ui';
-import { AH_BRAND_FONT, INK, ACCENT, MUTED, LINE, LINE2, BG_SOFT } from '../theme';
+import { AHScreen, AHChatInput, RIPPLE, pressedOpacity } from '../components/ui';
+import { AH_BRAND_FONT, INK, ACCENT, BG_SOFT } from '../theme';
 import { useNav } from '../nav';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { uploadImage } from '../imageUpload';
+import * as ImagePicker from 'expo-image-picker';
+import Svg, { Path, Rect } from 'react-native-svg';
 
 // 16 · Chat · attachment sheet (WhatsApp-style paperclip menu).
 export function ChatAttach() {
   const nav = useNav();
   const insets = useSafeAreaInsets();
+  const [uploading, setUploading] = useState(false);
+
+  const attach = async (source: 'photo' | 'camera') => {
+    if (uploading) return;
+    setUploading(true);
+    try {
+      let asset: ImagePicker.ImagePickerAsset | null = null;
+      if (source === 'photo') {
+        const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!perm.granted) {
+          Alert.alert('Permission needed', 'Allow photo library access.');
+          return;
+        }
+        const res = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          quality: 0.85,
+        });
+        if (!res.canceled && res.assets.length) asset = res.assets[0];
+      } else {
+        const perm = await ImagePicker.requestCameraPermissionsAsync();
+        if (!perm.granted) {
+          Alert.alert('Permission needed', 'Allow camera access.');
+          return;
+        }
+        const res = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          quality: 0.85,
+        });
+        if (!res.canceled && res.assets.length) asset = res.assets[0];
+      }
+      if (!asset) return;
+      const media = await uploadImage(asset);
+      Alert.alert('Sent', 'Attachment uploaded.', [
+        { text: 'OK', onPress: () => nav.back() },
+      ]);
+      void media; // TODO: pass key/url back to Chat thread on next slice
+    } catch (e) {
+      Alert.alert('Upload failed', String((e as Error).message ?? e));
+    } finally {
+      setUploading(false);
+    }
+  };
   const sheetItems = [
     { id: 'photo', label: 'Photo', d: 'M3 5h18v15H3zM3 16l5-5 5 5 3-3 5 5' },
     { id: 'camera', label: 'Camera', d: 'M4 7h3l2-3h6l2 3h3v13H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' },
@@ -202,12 +247,21 @@ export function ChatAttach() {
           {sheetItems.map((it) => (
             <Pressable
               key={it.id}
+              onPress={
+                it.id === 'photo'
+                  ? () => attach('photo')
+                  : it.id === 'camera'
+                  ? () => attach('camera')
+                  : undefined
+              }
+              disabled={(it.id === 'photo' || it.id === 'camera') && uploading}
               android_ripple={RIPPLE}
               style={pressedOpacity({
                 width: '22%',
                 alignItems: 'center',
                 gap: 8,
                 paddingVertical: 4,
+                opacity: (it.id === 'photo' || it.id === 'camera') && uploading ? 0.6 : 1,
               })}
             >
               <View

@@ -1,10 +1,14 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
-import Constants from 'expo-constants';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
+
+// SDK 53+ removed push notifications from Expo Go. Skip all push setup in that env
+// so we don't print noisy warnings on every reload.
+const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
 // Foreground behavior — show banner + sound + list entry when a push arrives
-// while the user is in the app.
+// while the user is in the app. Local notifications still work in Expo Go.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -26,6 +30,12 @@ export function getPushToken(): string | null {
  * Call once at app start; the token is stable across launches.
  */
 export async function registerForPushNotificationsAsync(): Promise<string | null> {
+  if (isExpoGo) {
+    // SDK 53+ — push tokens don't work in Expo Go. Skip silently; the
+    // Profile debug panel will say "Waiting for token" and tests should
+    // be done in a dev/preview build via EAS.
+    return null;
+  }
   if (!Device.isDevice) {
     // Simulator/emulator doesn't get a real push token; bail silently.
     return null;

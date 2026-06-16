@@ -1,7 +1,8 @@
+import './src/silence';
 import 'react-native-url-polyfill/auto';
 import 'expo-insights';
 import { registerRootComponent } from 'expo';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as Notifications from 'expo-notifications';
 import * as Linking from 'expo-linking';
 import { registerForPushNotificationsAsync } from './src/notifications';
@@ -21,7 +22,8 @@ import {
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { NavProvider, useNav } from './src/nav';
-import { AuthProvider } from './src/auth';
+import { AuthProvider, useAuth } from './src/auth';
+import { BusinessProvider } from './src/business';
 import { SCREENS } from './src/screens';
 import { SplashScreen } from './src/SplashScreen';
 
@@ -29,7 +31,13 @@ function AppContent() {
   const nav = useNav();
   const Screen = SCREENS[nav.current].Comp;
 
-  // Push notifications + Universal/App Links + custom-scheme deep links.
+  // Keep a stable ref to nav so the registration effect only runs ONCE on mount.
+  // (nav.go itself changes reference every navigation; without this, the effect
+  // would re-fire constantly and Linking.getInitialURL would keep routing back.)
+  const navRef = useRef(nav);
+  navRef.current = nav;
+
+  // Push notifications + Universal/App Links + custom-scheme deep links — once.
   useEffect(() => {
     registerForPushNotificationsAsync()
       .then((token) => {
@@ -37,39 +45,60 @@ function AppContent() {
       })
       .catch((e) => console.warn('[push] register failed', e));
 
-    // Push tap → deep-link to data.screen if provided
     const pushSub = Notifications.addNotificationResponseReceivedListener((r) => {
       const data = r.notification.request.content.data as { screen?: ScreenId };
       console.log('[push] tapped', data);
-      if (data?.screen) nav.go(data.screen);
+      if (data?.screen) navRef.current.go(data.screen);
     });
 
-    // Cold-start: app opened from an aihoni.com URL or aihoni:// scheme
     Linking.getInitialURL().then((url) => {
       if (!url) return;
       const target = resolveDeepLink(url);
       console.log('[link] initial', url, '→', target);
-      if (target) nav.go(target);
+      if (target) navRef.current.go(target);
     });
 
-    // Warm: incoming URL while app is running
     const linkSub = Linking.addEventListener('url', ({ url }) => {
       const target = resolveDeepLink(url);
       console.log('[link] received', url, '→', target);
-      if (target) nav.go(target);
+      if (target) navRef.current.go(target);
     });
 
     return () => {
       pushSub.remove();
       linkSub.remove();
     };
-  }, [nav]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <Screen />;
 }
 
-function App() {
+function Booted() {
+  const { user, restored } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
+
+  // Wait for both the SecureStore restore + the splash animation before mounting nav.
+  if (!restored) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
+
+  // Signed-in users skip onboarding and land directly on Chats.
+  const initial = user ? 'chats' : 'welcome';
+
+  return (
+    <>
+      <BusinessProvider>
+        <NavProvider initial={initial}>
+          <AppContent />
+        </NavProvider>
+      </BusinessProvider>
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+    </>
+  );
+}
+
+function App() {
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_600SemiBold,
@@ -83,13 +112,8 @@ function App() {
     <SafeAreaProvider>
       <StatusBar style="light" />
       <AuthProvider>
-        <NavProvider>
-          <AppContent />
-        </NavProvider>
+        {fontsLoaded ? <Booted /> : <SplashScreen onFinish={() => {}} />}
       </AuthProvider>
-      {(showSplash || !fontsLoaded) && (
-        <SplashScreen onFinish={() => setShowSplash(false)} />
-      )}
     </SafeAreaProvider>
   );
 }

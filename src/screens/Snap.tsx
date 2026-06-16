@@ -1,18 +1,50 @@
 import { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AHScreen, pressedOpacity } from '../components/ui';
 import { ImageSlot } from '../components/ImageSlot';
 import { AH_BRAND_FONT, ACCENT } from '../theme';
 import { useNav } from '../nav';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { pickAndUploadImage } from '../imageUpload';
+import { api, ApiError } from '../apiClient';
+import { useBusiness } from '../business';
+import Svg, { Path } from 'react-native-svg';
 
 // 13 · Snap camera — full-bleed viewfinder, AI lenses, mode strip, shutter.
 export function Snap() {
   const nav = useNav();
   const insets = useSafeAreaInsets();
+  const { currentId } = useBusiness();
   const [mode, setMode] = useState('Snap');
+  const [lastShot, setLastShot] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const modes = ['Story', 'Snap', 'Reel', 'Live'];
+
+  const capture = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const media = await pickAndUploadImage({ quality: 0.9 });
+      if (!media) return;
+      setLastShot(media.url);
+      try {
+        await api('/api/posts', {
+          method: 'POST',
+          body: { image_keys: [media.key], business_id: currentId },
+        });
+        Alert.alert('Posted', 'Snap uploaded to your feed.');
+      } catch (e) {
+        Alert.alert(
+          'Uploaded but not posted',
+          e instanceof ApiError && e.status === 401
+            ? 'Sign in to publish posts.'
+            : String((e as Error).message ?? e),
+        );
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
   const lenses = ['✨', '🌸', '🎭', '🌈', '🤖', '🔥'];
 
   const tools: Array<[string, string]> = [
@@ -28,10 +60,18 @@ export function Snap() {
 
   return (
     <AHScreen pad={false} style={{ backgroundColor: '#111', position: 'relative', overflow: 'hidden' }}>
-      <ImageSlot
-        placeholder="Camera preview"
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
+      {lastShot ? (
+        <Image
+          source={{ uri: lastShot }}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          resizeMode="cover"
+        />
+      ) : (
+        <ImageSlot
+          placeholder="Camera preview"
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        />
+      )}
 
       {/* gradient overlay */}
       <View
@@ -258,6 +298,8 @@ export function Snap() {
         }}
       >
         <Pressable
+          onPress={capture}
+          disabled={busy}
           android_ripple={{ color: 'rgba(255,255,255,0.25)', borderless: true, radius: 24 }}
           style={pressedOpacity({
             width: 48,
@@ -269,9 +311,15 @@ export function Snap() {
             flexShrink: 0,
           }, 0.55)}
         >
-          <ImageSlot placeholder=" " style={{ width: '100%', height: '100%' }} />
+          {lastShot ? (
+            <Image source={{ uri: lastShot }} style={{ width: '100%', height: '100%' }} />
+          ) : (
+            <ImageSlot placeholder=" " style={{ width: '100%', height: '100%' }} />
+          )}
         </Pressable>
         <Pressable
+          onPress={capture}
+          disabled={busy}
           android_ripple={{ color: 'rgba(255,255,255,0.25)', borderless: true, radius: 42 }}
           style={pressedOpacity({
             width: 82,
@@ -281,6 +329,7 @@ export function Snap() {
             borderColor: '#fff',
             alignItems: 'center',
             justifyContent: 'center',
+            opacity: busy ? 0.6 : 1,
           }, 0.8)}
         >
           <View

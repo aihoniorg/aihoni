@@ -9,8 +9,9 @@ import {
 } from 'react';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
+import * as SecureStore from 'expo-secure-store';
 import { Alert } from 'react-native';
-import { api, setSessionToken, getCachedToken } from './apiClient';
+import { api, setSessionToken } from './apiClient';
 
 // Required for the auth session to dismiss the in-app browser after redirect.
 WebBrowser.maybeCompleteAuthSession();
@@ -35,11 +36,17 @@ export interface AuthUser {
   name?: string;
   email?: string;
   picture?: string;
+  /** Avatar URL loaded from D1 (overrides Google picture once set). */
+  avatar_url?: string | null;
+  avatar_key?: string | null;
 }
 
 interface AuthApi {
   user: AuthUser | null;
+  /** True while a Google sign-in prompt is in progress. */
   loading: boolean;
+  /** False until the on-boot SecureStore restore attempt completes. */
+  restored: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -48,7 +55,10 @@ const AuthContext = createContext<AuthApi | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Loading is for the *sign-in in progress* state, not for app-boot session-restore.
+  // Restore happens in the background and never blocks UI.
+  const [loading, setLoading] = useState(false);
+  const [restored, setRestored] = useState(false);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: GOOGLE_WEB_CLIENT_ID,
@@ -58,22 +68,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     scopes: ['openid', 'profile', 'email'],
   });
 
-  // On boot — try to restore an existing session
+  // On boot — try to restore an existing session in the background. Never blocks UI.
   useEffect(() => {
     (async () => {
       try {
-        const tok = getCachedToken();
-        if (!tok) {
-          // try loading from SecureStore by making any API call (apiClient lazy-loads)
-          await api<{ user: AuthUser }>('/api/auth/me').then((r) => setUser(r.user)).catch(() => {});
-        } else {
-          const { user: u } = await api<{ user: AuthUser }>('/api/auth/me');
-          setUser(u);
-        }
+        const stored = await SecureStore.getItemAsync('aihoni.session.jwt');
+        if (!stored) return; // no session, nothing to restore
+        await setSessionToken(stored);
+        const { user: u } = await api<{ user: AuthUser }>('/api/auth/me');
+        setUser(u);
       } catch {
-        // not logged in — fine
+        // Invalid/expired token — clear it silently.
+        await setSessionToken(null);
       } finally {
-        setLoading(false);
+        setRestored(true);
       }
     })();
   }, []);
@@ -121,8 +129,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthApi>(
-    () => ({ user, loading, signInWithGoogle, signOut }),
-    [user, loading, signInWithGoogle, signOut],
+    () => ({ user, loading, restored, signInWithGoogle, signOut }),
+    [user, loading, restored, signInWithGoogle, signOut],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

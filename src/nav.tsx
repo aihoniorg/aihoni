@@ -49,13 +49,21 @@ interface NavApi {
   go: (id: ScreenId) => void;
   next: () => void;
   back: () => void;
+  /** Wipe the stack and land on the given screen. Used by sign-in / sign-out. */
+  reset: (id: ScreenId) => void;
   canGoBack: boolean;
 }
 
 const NavContext = createContext<NavApi | null>(null);
 
-export function NavProvider({ children }: { children: ReactNode }) {
-  const [stack, setStack] = useState<ScreenId[]>(['welcome']);
+export function NavProvider({
+  children,
+  initial = 'welcome',
+}: {
+  children: ReactNode;
+  initial?: ScreenId;
+}) {
+  const [stack, setStack] = useState<ScreenId[]>([initial]);
   const current = stack[stack.length - 1];
 
   const go = useCallback((id: ScreenId) => {
@@ -77,9 +85,13 @@ export function NavProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const reset = useCallback((id: ScreenId) => {
+    setStack([id]);
+  }, []);
+
   const value = useMemo<NavApi>(
-    () => ({ current, go, next, back, canGoBack: stack.length > 1 }),
-    [current, go, next, back, stack.length],
+    () => ({ current, go, next, back, reset, canGoBack: stack.length > 1 }),
+    [current, go, next, back, reset, stack.length],
   );
 
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>;

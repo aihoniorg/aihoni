@@ -1,14 +1,54 @@
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { useState } from 'react';
+import { View, Text, ScrollView, Pressable, Image, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AHScreen, AHHeader, AHButton, RIPPLE, pressedOpacity } from '../components/ui';
-import { AH_BRAND_FONT, INK, MUTED, LINE, BG_SOFT, FAINT } from '../theme';
+import { AH_BRAND_FONT, INK, MUTED, BG_SOFT } from '../theme';
 import { useNav } from '../nav';
-import Svg, { Path, Circle } from 'react-native-svg';
+import { pickAndUploadImage } from '../imageUpload';
+import { api, ApiError } from '../apiClient';
+import { useBusiness } from '../business';
+import Svg, { Path } from 'react-native-svg';
+
+interface PhotoItem {
+  url: string;
+  title: string;
+  sub: string;
+}
 
 // 10 · Teach aihoni your business — unified input grid + knowledge list.
 export function Knowledge() {
   const nav = useNav();
   const insets = useSafeAreaInsets();
+  const { currentId } = useBusiness();
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  const addPhoto = async () => {
+    setUploading(true);
+    try {
+      const media = await pickAndUploadImage({ allowsEditing: false, quality: 0.85 });
+      if (!media) return;
+      const title = 'Photo · ' + new Date().toLocaleTimeString();
+      setPhotos((p) => [{ url: media.url, title, sub: 'Uploaded' }, ...p]);
+
+      if (!currentId) return; // upload-only, no business to persist against yet
+      try {
+        await api('/api/knowledge', {
+          method: 'POST',
+          body: { business_id: currentId, kind: 'photo', source_key: media.key, title },
+        });
+      } catch (e) {
+        Alert.alert(
+          'Saved locally only',
+          e instanceof ApiError && e.status === 401
+            ? 'Sign in to save knowledge to this business.'
+            : 'Could not attach this photo to your business right now.',
+        );
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
   const inputs = [
     { id: 'photo', label: 'Picture', sub: 'फोटो', d: 'M3 5h18v15H3zM3 16l5-5 5 5 3-3 5 5' },
     { id: 'voice', label: 'Voice note', sub: 'आवाज', d: 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11.5a7 7 0 0 0 14 0M12 18.5V22' },
@@ -56,6 +96,8 @@ export function Knowledge() {
           {inputs.map((it) => (
             <Pressable
               key={it.id}
+              onPress={it.id === 'photo' ? addPhoto : undefined}
+              disabled={it.id === 'photo' && uploading}
               android_ripple={RIPPLE}
               style={pressedOpacity({
                 width: '31%',
@@ -67,6 +109,7 @@ export function Knowledge() {
                 paddingHorizontal: 6,
                 alignItems: 'center',
                 gap: 3,
+                opacity: it.id === 'photo' && uploading ? 0.6 : 1,
               })}
             >
               <View
@@ -125,6 +168,33 @@ export function Knowledge() {
           </Text>
         </View>
         <View style={{ flexDirection: 'column', gap: 6 }}>
+          {photos.map((p) => (
+            <View
+              key={p.url}
+              style={{
+                backgroundColor: '#fff',
+                borderWidth: 1.5,
+                borderColor: '#EFECEC',
+                borderRadius: 12,
+                padding: 7,
+                paddingHorizontal: 11,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <Image
+                source={{ uri: p.url }}
+                style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: BG_SOFT }}
+              />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 13, fontWeight: '600', color: INK }} numberOfLines={1}>
+                  {p.title}
+                </Text>
+                <Text style={{ fontSize: 11, color: MUTED, marginTop: 0.5 }}>{p.sub}</Text>
+              </View>
+            </View>
+          ))}
           {added.map(([tag, title, sub]) => (
             <Pressable
               key={title}

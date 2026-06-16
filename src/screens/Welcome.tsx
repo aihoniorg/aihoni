@@ -2,10 +2,14 @@ import { View, Text } from 'react-native';
 import { AHScreen, AHButton, AHOrb, AHWordmark } from '../components/ui';
 import { AH_BRAND_FONT, ACCENT, MUTED } from '../theme';
 import { useNav } from '../nav';
+import { useAuth } from '../auth';
 
 // 01 · Welcome — voice-orb splash + language-neutral greeting.
 export function Welcome() {
   const nav = useNav();
+  const { user } = useAuth();
+  // If the user already has a session, "I already have an account" jumps straight in.
+  const goSignIn = () => (user ? nav.reset('chats') : nav.go('signin'));
   return (
     <AHScreen style={{ backgroundColor: '#EEF3FD' }}>
       <View
@@ -49,8 +53,8 @@ export function Welcome() {
         <AHButton kind="primary" onClick={nav.next}>
           Get started
         </AHButton>
-        <AHButton kind="ghost" onClick={() => nav.go('signin')}>
-          I already have an account
+        <AHButton kind="ghost" onClick={goSignIn}>
+          {user ? 'Continue as ' + (user.name?.split(' ')[0] ?? 'me') : 'I already have an account'}
         </AHButton>
       </View>
     </AHScreen>

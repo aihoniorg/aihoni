@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { AHScreen, AHProgress, AHTitle, AHButton, AHOrb } from '../components/ui';
 import { AH_BRAND_FONT, INK, BG_SOFT, FAINT, ACCENT } from '../theme';
@@ -10,10 +10,18 @@ export function SignIn() {
   const nav = useNav();
   const { user, loading, signInWithGoogle } = useAuth();
 
-  // Auto-advance after a successful sign-in
+  // Auto-advance only when the user signs in *while on this screen*.
+  // Capture whether a user was already present at mount; if so, don't auto-jump
+  // (otherwise navigating back to SignIn would loop forward immediately).
+  const userAtMount = useRef<boolean>(!!user);
   useEffect(() => {
-    if (user) nav.next();
-  }, [user, nav]);
+    if (user && !userAtMount.current) {
+      nav.next();
+    }
+    // Intentionally exclude nav from deps — nav reference changes on every
+    // navigation, which would otherwise re-run this effect repeatedly.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
   return (
     <AHScreen>
       <AHProgress step={1} />
@@ -30,22 +38,21 @@ export function SignIn() {
         <View style={{ flexDirection: 'column', gap: 12, marginTop: 6 }}>
           <AHButton
             kind="outline"
-            disabled={loading}
             onClick={signInWithGoogle}
             icon={
-              loading ? (
-                <ActivityIndicator size="small" color={ACCENT} />
-              ) : (
-                <View
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 12,
-                    backgroundColor: BG_SOFT,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
+              <View
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
+                  backgroundColor: BG_SOFT,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color={ACCENT} />
+                ) : (
                   <Text
                     style={{
                       fontWeight: '800',
@@ -56,11 +63,11 @@ export function SignIn() {
                   >
                     G
                   </Text>
-                </View>
-              )
+                )}
+              </View>
             }
           >
-            {loading ? 'Checking session…' : 'Continue with Google'}
+            Continue with Google
           </AHButton>
           <AHButton
             kind="dark"
