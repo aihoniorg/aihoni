@@ -5,7 +5,9 @@ import { AHScreen, pressedOpacity } from '../components/ui';
 import { ImageSlot } from '../components/ImageSlot';
 import { AH_BRAND_FONT, ACCENT } from '../theme';
 import { useNav } from '../nav';
-import { pickAndUploadImage } from '../imageUpload';
+import { pickAndUploadImage, uploadImage } from '../imageUpload';
+import { requestCameraPermission } from '../permissions';
+import * as ImagePicker from 'expo-image-picker';
 import { api, ApiError } from '../apiClient';
 import { useBusiness } from '../business';
 import Svg, { Path } from 'react-native-svg';
@@ -20,27 +22,53 @@ export function Snap() {
   const [busy, setBusy] = useState(false);
   const modes = ['Story', 'Snap', 'Reel', 'Live'];
 
-  const capture = async () => {
+  const publish = async (mediaKey: string, mediaUrl: string) => {
+    setLastShot(mediaUrl);
+    try {
+      await api('/api/posts', {
+        method: 'POST',
+        body: { image_keys: [mediaKey], business_id: currentId },
+      });
+      Alert.alert('Posted', 'Snap uploaded to your feed.');
+    } catch (e) {
+      Alert.alert(
+        'Uploaded but not posted',
+        e instanceof ApiError && e.status === 401
+          ? 'Sign in to publish posts.'
+          : String((e as Error).message ?? e),
+      );
+    }
+  };
+
+  // Shutter — opens the camera directly after asking for permission.
+  const shoot = async () => {
+    if (busy) return;
+    const ok = await requestCameraPermission();
+    if (!ok) return;
+    setBusy(true);
+    try {
+      const res = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.9,
+      });
+      if (res.canceled || !res.assets.length) return;
+      const media = await uploadImage(res.assets[0]);
+      await publish(media.key, media.url);
+    } catch (e) {
+      Alert.alert('Could not capture', String((e as Error).message ?? e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Thumbnail — opens the library / camera action sheet.
+  const pickFromGallery = async () => {
     if (busy) return;
     setBusy(true);
     try {
       const media = await pickAndUploadImage({ quality: 0.9 });
       if (!media) return;
-      setLastShot(media.url);
-      try {
-        await api('/api/posts', {
-          method: 'POST',
-          body: { image_keys: [media.key], business_id: currentId },
-        });
-        Alert.alert('Posted', 'Snap uploaded to your feed.');
-      } catch (e) {
-        Alert.alert(
-          'Uploaded but not posted',
-          e instanceof ApiError && e.status === 401
-            ? 'Sign in to publish posts.'
-            : String((e as Error).message ?? e),
-        );
-      }
+      await publish(media.key, media.url);
     } finally {
       setBusy(false);
     }
@@ -298,7 +326,7 @@ export function Snap() {
         }}
       >
         <Pressable
-          onPress={capture}
+          onPress={pickFromGallery}
           disabled={busy}
           android_ripple={{ color: 'rgba(255,255,255,0.25)', borderless: true, radius: 24 }}
           style={pressedOpacity({
@@ -318,7 +346,7 @@ export function Snap() {
           )}
         </Pressable>
         <Pressable
-          onPress={capture}
+          onPress={shoot}
           disabled={busy}
           android_ripple={{ color: 'rgba(255,255,255,0.25)', borderless: true, radius: 42 }}
           style={pressedOpacity({
