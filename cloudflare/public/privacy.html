@@ -8,6 +8,7 @@
   <meta name="description" content="How aihoni collects, uses and protects your information." />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/css/site.css" />
+  <script>(function(){var r=document.documentElement;r.classList.add('js');try{var s=localStorage.getItem('theme');r.setAttribute('data-theme',s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));}catch(e){}})();</script>
   <style>
     .legal{max-width:760px;margin:0 auto;padding:56px 24px 0}
     .legal h1{font-size:clamp(30px,4vw,42px);font-weight:800;margin-bottom:8px}
@@ -30,6 +31,7 @@
       </nav>
       <div class="nav-cta">
         <a class="btn primary sm" href="/download">Get the app</a>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle theme"></button>
         <button class="nav-toggle" aria-label="Menu" onclick="document.getElementById('navlinks').classList.toggle('open')">☰</button>
       </div>
     </div>
@@ -94,5 +96,7 @@
   </footer>
 
   <script>var y=new Date().getFullYear();document.getElementById('yr').textContent=y;document.getElementById('d').textContent=new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long'});</script>
+  <script src="/js/theme.js" defer></script>
+
 </body>
 </html>

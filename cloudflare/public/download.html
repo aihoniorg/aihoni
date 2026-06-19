@@ -11,6 +11,7 @@
   <meta property="og:description" content="Get aihoni for iOS and Android — free to start." />
   <meta property="og:image" content="https://aihoni.com/img/people/hero.jpg" />
   <link rel="stylesheet" href="/css/site.css" />
+  <script>(function(){var r=document.documentElement;r.classList.add('js');try{var s=localStorage.getItem('theme');r.setAttribute('data-theme',s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));}catch(e){}})();</script>
 </head>
 <body>
 
@@ -25,6 +26,7 @@
       </nav>
       <div class="nav-cta">
         <a class="btn primary sm" href="#get">Get the app</a>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle theme"></button>
         <button class="nav-toggle" aria-label="Menu" onclick="document.getElementById('navlinks').classList.toggle('open')">☰</button>
       </div>
     </div>
@@ -149,5 +151,7 @@
   </footer>
 
   <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+  <script src="/js/theme.js" defer></script>
+
 </body>
 </html>

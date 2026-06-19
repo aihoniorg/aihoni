@@ -37,7 +37,7 @@ if (canvas && window.WebGLRenderingContext) {
   nodes.forEach((n, i) => { nodePos[i * 3] = n.x; nodePos[i * 3 + 1] = n.y; nodePos[i * 3 + 2] = n.z; });
   nodeGeo.setAttribute('position', new THREE.BufferAttribute(nodePos, 3));
   group.add(new THREE.Points(nodeGeo, new THREE.PointsMaterial({
-    color: ACCENT, size: 0.5, transparent: true, opacity: 0.9, sizeAttenuation: true
+    color: ACCENT, size: 0.4, transparent: true, opacity: 0.55, sizeAttenuation: true
   })));
 
   // ----- links (connections) between nearby nodes -----
@@ -55,22 +55,22 @@ if (canvas && window.WebGLRenderingContext) {
   const lineGeo = new THREE.BufferGeometry();
   lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
   group.add(new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({
-    color: ACCENT, transparent: true, opacity: 0.22
+    color: ACCENT, transparent: true, opacity: 0.12
   })));
 
   // ----- message pulses travelling along links -----
-  const PULSE_COUNT = reduce ? 0 : 16;
+  const PULSE_COUNT = reduce ? 0 : 8;
   const pulsePos = new Float32Array(Math.max(PULSE_COUNT, 1) * 3);
   const pulseGeo = new THREE.BufferGeometry();
   pulseGeo.setAttribute('position', new THREE.BufferAttribute(pulsePos, 3));
   group.add(new THREE.Points(pulseGeo, new THREE.PointsMaterial({
-    color: 0xffffff, size: 0.7, transparent: true, opacity: 0.95, sizeAttenuation: true
+    color: ACCENT, size: 0.55, transparent: true, opacity: 0.6, sizeAttenuation: true
   })));
 
   const spawn = () => ({
     edge: edges[Math.floor(Math.random() * edges.length)] || [0, 1],
     t: Math.random(),
-    speed: 0.004 + Math.random() * 0.011
+    speed: 0.003 + Math.random() * 0.007
   });
   const pulses = Array.from({ length: PULSE_COUNT }, spawn);
 
@@ -89,8 +89,8 @@ if (canvas && window.WebGLRenderingContext) {
 
   function frame() {
     resize();
-    group.rotation.y += 0.0016 + mx * 0.0009;
-    group.rotation.x = Math.sin(Date.now() * 0.0001) * 0.12;
+    group.rotation.y += 0.0009 + mx * 0.0006;
+    group.rotation.x = Math.sin(Date.now() * 0.0001) * 0.08;
     for (let i = 0; i < PULSE_COUNT; i++) {
       const p = pulses[i];
       p.t += p.speed;

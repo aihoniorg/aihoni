@@ -11,6 +11,7 @@
   <meta property="og:description" content="Sell more, work less. The AI साथी built for Nepali small businesses." />
   <meta property="og:image" content="https://aihoni.com/img/people/owner-6.jpg" />
   <link rel="stylesheet" href="/css/site.css" />
+  <script>(function(){var r=document.documentElement;r.classList.add('js');try{var s=localStorage.getItem('theme');r.setAttribute('data-theme',s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));}catch(e){}})();</script>
 </head>
 <body>
 
@@ -25,6 +26,7 @@
       </nav>
       <div class="nav-cta">
         <a class="btn primary sm" href="/download">Get the app</a>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle theme"></button>
         <button class="nav-toggle" aria-label="Menu" onclick="document.getElementById('navlinks').classList.toggle('open')">☰</button>
       </div>
     </div>
@@ -65,11 +67,13 @@
   <!-- ===== PAYMENTS STRIP ===== -->
   <div class="strip">
     <div class="wrap">
-      <span class="label">Collect payments through —</span>
-      <span class="pay">eSewa</span>
-      <span class="pay">Khalti</span>
-      <span class="pay">IME Pay</span>
-      <span class="pay">ConnectIPS</span>
+      <span class="label">Collect payments through</span>
+      <div class="chips">
+        <span class="pay">eSewa</span>
+        <span class="pay">Khalti</span>
+        <span class="pay">IME Pay</span>
+        <span class="pay">ConnectIPS</span>
+      </div>
     </div>
   </div>
 
@@ -213,5 +217,7 @@
   </footer>
 
   <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+  <script src="/js/theme.js" defer></script>
+
 </body>
 </html>
