@@ -3,7 +3,7 @@ import { getCookie } from 'hono/cookie';
 import { verifyJwt } from '../lib/jwt';
 import type { Env } from '../types';
 
-export async function requireAuth(c: Context<{ Bindings: Env }>, next: Next) {
+export async function requireAuth(c: Context<{ Bindings: Env; Variables: { userId: string } }>, next: Next) {
   const token = getCookie(c, 'ah_session');
   if (!token) return c.json({ error: 'Unauthorized' }, 401);
   try {
