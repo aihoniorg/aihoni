@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { View, Text, Pressable, Alert } from 'react-native';
-import { useAudioRecorder, RecordingPresets } from 'expo-audio';
+import { Audio } from 'expo-av';
 import { AHScreen, AHProgress, AHTitle, AHButton, AHOrb, AHWave, pressedOpacity } from '../components/ui';
 import { MUTED, LINE2, ACCENT } from '../theme';
 import { useNav } from '../nav';
@@ -30,10 +30,10 @@ async function uploadAudio(uri: string): Promise<string | null> {
   }
 }
 
-// 06 · Voice-first setup.
+// 06 · Voice-first setup — hold-to-talk push-to-record.
 export function Voice() {
   const nav = useNav();
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recordingRef = useRef<Audio.Recording | null>(null);
   const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
   const [lastClip, setLastClip] = useState<string | null>(null);
@@ -52,8 +52,14 @@ export function Voice() {
     if (!ok) return;
     setBusy(true);
     try {
-      await recorder.prepareToRecordAsync();
-      recorder.record();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+      const r = new Audio.Recording();
+      await r.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+      await r.startAsync();
+      recordingRef.current = r;
       setRecording(true);
     } catch (e) {
       Alert.alert('Could not start recording', String((e as Error).message ?? e));
@@ -63,12 +69,14 @@ export function Voice() {
   };
 
   const stopRecording = async () => {
-    if (!recording) return;
+    const r = recordingRef.current;
+    if (!recording || !r) return;
     setBusy(true);
+    setRecording(false);
+    recordingRef.current = null;
     try {
-      await recorder.stop();
-      setRecording(false);
-      const uri = recorder.uri;
+      await r.stopAndUnloadAsync();
+      const uri = r.getURI();
       if (uri) {
         const url = await uploadAudio(uri);
         if (url) setLastClip(url);
