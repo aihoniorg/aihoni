@@ -1,6 +1,6 @@
 import { Alert, Linking, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { requestRecordingPermissionsAsync, getRecordingPermissionsAsync } from 'expo-audio';
+import { Audio } from 'expo-av';
 
 function openSettingsAlert(title: string, body: string) {
   Alert.alert(title, body, [
@@ -17,7 +17,7 @@ function openSettingsAlert(title: string, body: string) {
 
 /** Prompt for the microphone permission; returns true if granted. */
 export async function requestMicPermission(): Promise<boolean> {
-  const existing = await getRecordingPermissionsAsync();
+  const existing = await Audio.getPermissionsAsync();
   if (existing.granted) return true;
   if (!existing.canAskAgain) {
     openSettingsAlert(
@@ -26,7 +26,7 @@ export async function requestMicPermission(): Promise<boolean> {
     );
     return false;
   }
-  const res = await requestRecordingPermissionsAsync();
+  const res = await Audio.requestPermissionsAsync();
   if (!res.granted) {
     Alert.alert('Microphone needed', 'aihoni cannot hear you without microphone access.');
   }

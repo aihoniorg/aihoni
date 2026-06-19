@@ -12,7 +12,7 @@ binding = "STORAGE"
 bucket_name = "aihoni-media"
 
 [vars]
-GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID"
+GOOGLE_CLIENT_ID = "601692239927-6dc3jc7p8miaesv9kjdv5qvu7pvgu0p0.apps.googleusercontent.com"
 APP_URL = "https://aihoni.com"
 
 # Set these as secrets via `wrangler secret put`:

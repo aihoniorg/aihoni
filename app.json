@@ -30,6 +30,8 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#1a1d2e"
       },
+      "permissions": ["CAMERA", "RECORD_AUDIO"],
+      "googleServicesFile": "./google-services.json",
       "package": "com.nepfinder.aihoni",
       "intentFilters": [
         {
@@ -64,7 +66,19 @@
       ],
       "expo-secure-store",
       "expo-web-browser",
-      "expo-audio"
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow aihoni to use your microphone to record voice notes."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow aihoni to access your photos to upload an image.",
+          "cameraPermission": "Allow aihoni to use your camera to take a photo."
+        }
+      ]
     ],
     "extra": {
       "eas": {

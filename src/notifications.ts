@@ -11,7 +11,6 @@ const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreCl
 // while the user is in the app. Local notifications still work in Expo Go.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldShowBanner: true,
     shouldShowList: true,
     shouldPlaySound: true,

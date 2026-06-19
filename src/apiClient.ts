@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
-export const API_BASE = 'https://aihoni.com';
+export const API_BASE = 'https://aihoni-api.aihoni.workers.dev';
 
 const TOKEN_KEY = 'aihoni.session.jwt';
 
