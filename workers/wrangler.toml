@@ -1,0 +1,25 @@
+name = "aihoni-api"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "aihoni-production"
+database_id = "0849744c-9b33-4cc2-b052-5cab8d85cbb7"
+
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "aihoni-media"
+
+[vars]
+GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID"
+APP_URL = "https://aihoni.com"
+
+# Set these as secrets via `wrangler secret put`:
+# GOOGLE_CLIENT_SECRET
+# JWT_SECRET
+# KV_SESSION (KV namespace ID for sessions)
+
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "586539706a5a4c99a1f249bb4155d727"
