@@ -1,15 +1,12 @@
 name: Deploy Cloudflare Pages
 
-# Deploys cloudflare/public + cloudflare/functions to the production aihoni.com
-# alias whenever main moves (push or PR merge). Manual runs supported via the
-# Actions tab.
+# Deploys cloudflare/public + cloudflare/functions to production aihoni.com
+# only when a GitHub Release is published (not on every commit/push).
+# Manual runs are also supported via the Actions tab.
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'cloudflare/**'
-      - '.github/workflows/deploy-cloudflare.yml'
+  release:
+    types: [published]
   workflow_dispatch:
 
 concurrency:
