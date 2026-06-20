@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#3B76EF" />
+  <meta name="theme-color" content="#F4633A" />
   <title>aihoni · आफ्नालाई सधैं नजिक</title>
   <meta name="description" content="aihoni keeps you close to family and friends — free chat, voice calls, video calls and group calls, plus your own AI साथी. Made for Nepal, near and far." />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -17,9 +17,6 @@
 </head>
 <body>
 
-  <!-- full-page connection-network background (people linked by messages) -->
-  <canvas id="connect-canvas" class="connect-bg" aria-hidden="true"></canvas>
-
   <!-- ===== NAV ===== -->
   <header class="nav">
     <div class="wrap">
@@ -31,7 +28,7 @@
         <a href="/download">Download</a>
       </nav>
       <div class="nav-cta">
-        <a class="btn primary sm" href="/download">Get the app</a>
+        <a class="btn primary sm" href="/download">Get aihoni</a>
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle theme"></button>
         <button class="nav-toggle" aria-label="Menu" onclick="document.getElementById('navlinks').classList.toggle('open')">☰</button>
       </div>
@@ -39,212 +36,179 @@
   </header>
 
   <!-- ===== HERO ===== -->
-  <section class="hero">
-    <div class="wrap hero-grid">
-      <div class="hero-copy reveal">
-        <span class="eyebrow">नेपाली परिवारका लागि</span>
-        <h1>आफ्नालाई सधैं <span class="accent">नजिक</span>।</h1>
-        <p class="lead">Chat, voice calls, video calls and group calls to stay close to the people you love — wherever they are in the world. Plus your own AI साथी, any time you need one.</p>
-        <div class="ctas">
-          <a class="badge" href="https://apps.apple.com/app/aihoni" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="#fff"><path d="M16.5 1.4c.1 1-.3 2-.9 2.8-.7.8-1.7 1.4-2.7 1.3-.1-1 .4-2 1-2.7.6-.8 1.7-1.3 2.6-1.4zM19 17.3c-.5 1.1-.7 1.6-1.3 2.6-.9 1.4-2.1 3.1-3.6 3.1-1.3 0-1.7-.9-3.5-.8-1.8 0-2.2.8-3.5.8-1.5 0-2.7-1.5-3.6-2.9C1 16.6.8 12 2.4 9.6c1.1-1.7 2.9-2.7 4.5-2.7 1.7 0 2.7.9 4 .9 1.3 0 2.1-.9 4-.9 1.5 0 3 .8 4.1 2.2-3.6 2-3 7.1 0 8.2z"/></svg>
-            <span class="t"><small>Download on the</small><b>App Store</b></span>
-          </a>
-          <a class="badge" href="https://play.google.com/store/apps/details?id=com.nepfinder.aihoni" rel="noopener">
-            <svg viewBox="0 0 24 24"><path fill="#fff" d="M3.6 1.8c-.3.3-.5.7-.5 1.3v17.8c0 .6.2 1 .5 1.3l.1.1L13 12.1v-.2L3.7 1.7l-.1.1z"/><path fill="#fff" d="M16.2 15.3 13 12.1v-.2l3.2-3.2.1.1 3.8 2.2c1.1.6 1.1 1.6 0 2.2l-3.8 2.1z"/><path fill="#fff" d="M16.3 15.2 13 12 3.6 22.2c.4.4 1 .4 1.7.1l11-6.9z"/><path fill="#fff" d="M16.3 8.8 5.3 1.9c-.7-.4-1.3-.3-1.7.1L13 12l3.3-3.2z"/></svg>
-            <span class="t"><small>Get it on</small><b>Google Play</b></span>
-          </a>
+  <section class="hero-sage">
+    <div class="wrap">
+      <div class="hero-row">
+        <div class="hero-copy reveal">
+          <span class="tag">Private messaging for आफ्ना</span>
+          <h1>Say <span class="hl rotator" id="greet">नमस्ते!</span><br>To Your Friends&nbsp;&amp; Family</h1>
+          <p class="lead">Rich, interactive chat, voice and video to share every precious moment with the people closest to you — with all the privacy you need.</p>
+          <div class="ctas">
+            <a class="btn primary lg" href="/download">Get aihoni
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg>
+            </a>
+          </div>
         </div>
-        <div class="trust">
-          <span class="avatars">
-            <img src="/img/people/owner-1.jpg" alt="" />
-            <img src="/img/people/owner-4.jpg" alt="" />
+
+        <div class="chat-stage reveal d1">
+          <div class="chip-msg chip-top">
             <img src="/img/people/owner-6.jpg" alt="" />
-            <img src="/img/people/owner-2.jpg" alt="" />
-          </span>
-          Connecting families across नेपाल and the world
+            <div><b>Jessi</b><p>I'd rather listen to a podcast, watch football, or a movie</p></div>
+          </div>
+
+          <div class="chat-card">
+            <div class="cbub out">I've got just the spot <span>16:38</span></div>
+            <div class="c-photo"><img src="/img/people/chatting.png" alt="Friends planning together on aihoni" /></div>
+            <div class="cbub out">Any website for stock images? <span>You</span></div>
+            <div class="voice-note">
+              <button class="vplay" aria-label="Play voice note">▶</button>
+              <div class="vbars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <span class="vtime">02:40</span>
+            </div>
+            <div class="cbub in">Mario's @ Light street <span>16:41</span></div>
+          </div>
+
+          <div class="video-pip">
+            <img src="/img/people/owner-3.jpg" alt="" />
+            <button class="pipx" aria-label="Close">×</button>
+          </div>
+
+          <div class="chip-msg chip-bot">
+            <img src="/img/people/m-elder.jpg" alt="" />
+            <div><b>JJ</b><p>common!! 🙌</p></div>
+          </div>
         </div>
       </div>
+    </div>
+  </section>
 
-      <div class="hero-art reveal d1" style="display:flex;justify-content:center;align-items:center">
-        <div class="phone">
-          <div class="notch"></div>
-          <div class="screen">
-            <div class="vcall">
-              <img src="/img/people/chatting.png" alt="Video call with family on aihoni" />
-              <div class="vc-top"><b class="np">बहिनी</b><span class="live"><i></i> 12:04</span></div>
-              <div class="vc-pip"><img src="/img/people/owner-1.jpg" alt="" /></div>
-              <div class="vc-controls">
-                <span class="b"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" stroke-width="2"/><path d="M6 11.5a6 6 0 0 0 12 0M12 17.5V21" stroke-width="2" stroke-linecap="round"/></svg></span>
-                <span class="b"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2" stroke-width="2"/><path d="m16 10 5-3v10l-5-3z" stroke-width="2" stroke-linejoin="round"/></svg></span>
-                <span class="b end"><svg viewBox="0 0 24 24"><path d="M3 10c5-4 13-4 18 0l-2.5 3-3.5-1v-2c-2-1-4.5-1-6.5 0v2L5 13 3 10z" fill="#fff" stroke="none"/></svg></span>
+  <!-- ===== STATEMENT + CHAT CLUSTER ===== -->
+  <section class="statement">
+    <div class="wrap">
+      <div class="statement-row">
+        <h2 class="reveal">With private messaging and calling, you can be yourself, speak freely and feel close to the most important people in your life — no matter where they are.</h2>
+        <div class="chat-cluster reveal d1">
+          <div class="svc-card">
+            <span class="logo spotify"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.6 14.4a.6.6 0 0 1-.86.2c-2.35-1.43-5.3-1.76-8.79-.96a.62.62 0 1 1-.28-1.2c3.8-.88 7.07-.5 9.7 1.1.3.18.4.57.23.86zm1.23-2.74a.78.78 0 0 1-1.07.26c-2.69-1.65-6.79-2.13-9.97-1.16a.78.78 0 1 1-.45-1.49c3.63-1.1 8.15-.57 11.24 1.32.36.22.48.7.25 1.07zm.1-2.85C14.84 8.04 9.3 7.85 6.2 8.79a.93.93 0 1 1-.54-1.78c3.56-1.08 9.68-.87 13.5 1.4a.94.94 0 0 1-.96 1.6z"/></svg></span>
+            <div><b>Listening is everything</b><span>Spotify is all the music you'll ever need.</span></div>
+          </div>
+          <div class="grp-card">
+            <img src="/img/people/child.jpg" alt="" />
+            <div>
+              <div class="gt">Pet Lovers 🐱🐶</div>
+              <p>Jamal: It's good we all accept my cat is the meanest 😼</p>
+            </div>
+          </div>
+          <div class="cluster-bub r">Let's get lunch. How about pizza? 🍕</div>
+          <div class="cluster-bub">Let's do it! I'm in a meeting until noon.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== APP SCREENSHOT SHOWCASE ===== -->
+  <section class="showcase">
+    <div class="wrap center">
+      <span class="eyebrow reveal">Inside aihoni</span>
+      <h2 class="title reveal">Everything in one app</h2>
+      <p class="lead reveal">Chat, group calls, your AI साथी, reels and your पसल — all in नेपाली, all in one place.</p>
+      <div class="shots reveal">
+        <figure class="gitem">
+          <div class="shot"><img src="/img/aihoni-screen/11-chats.png" alt="aihoni chats list" loading="lazy" /></div>
+          <figcaption>All your chats</figcaption>
+        </figure>
+        <figure class="gitem">
+          <div class="shot"><img src="/img/aihoni-screen/15-chat-with-aihoni.png" alt="Chatting with the aihoni AI साथी" loading="lazy" /></div>
+          <figcaption>AI साथी</figcaption>
+        </figure>
+        <figure class="gitem">
+          <div class="shot"><img src="/img/aihoni-screen/14-group-chat.png" alt="aihoni group chat" loading="lazy" /></div>
+          <figcaption>Family groups</figcaption>
+        </figure>
+        <figure class="gitem">
+          <div class="shot"><img src="/img/aihoni-screen/18-reels.png" alt="aihoni reels" loading="lazy" /></div>
+          <figcaption>Reels</figcaption>
+        </figure>
+        <figure class="gitem">
+          <div class="shot"><img src="/img/aihoni-screen/12-feed.png" alt="aihoni feed" loading="lazy" /></div>
+          <figcaption>Your feed</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURE: lifetime moments (dark) ===== -->
+  <section class="feat feat-dark">
+    <div class="wrap">
+      <div class="feat-grid reverse">
+        <div class="feat-copy reveal">
+          <h2>Share your important lifetime moments — on a single tap!</h2>
+          <p>From a whole-family group call to a quick call with आमा, aihoni makes you feel like you're in the same room — with crystal-clear voice and HD video.</p>
+          <a class="btn primary" href="/download">Get aihoni
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg>
+          </a>
+        </div>
+        <div class="feat-art reveal d1">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="screen">
+              <div class="vcall">
+                <img src="/img/people/chatting.png" alt="Video call with family on aihoni" />
+                <div class="vc-top"><b class="np">परिवार समूह</b><span class="live"><i></i> 12:36</span></div>
+                <div class="vc-pip"><img src="/img/people/owner-1.jpg" alt="" /></div>
+                <div class="vc-controls">
+                  <span class="b"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" stroke-width="2"/><path d="M6 11.5a6 6 0 0 0 12 0M12 17.5V21" stroke-width="2" stroke-linecap="round"/></svg></span>
+                  <span class="b"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2" stroke-width="2"/><path d="m16 10 5-3v10l-5-3z" stroke-width="2" stroke-linejoin="round"/></svg></span>
+                  <span class="b end"><svg viewBox="0 0 24 24"><path d="M3 10c5-4 13-4 18 0l-2.5 3-3.5-1v-2c-2-1-4.5-1-6.5 0v2L5 13 3 10z" fill="#fff" stroke="none"/></svg></span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="float-card float-tl">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="13" height="12" rx="2" stroke="#fff" stroke-width="2"/><path d="m16 10 5-3v10l-5-3z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg></div>
-          <div><b>HD video call</b><span>Free · नेपाल ↔ world</span></div>
-        </div>
-        <div class="float-card float-br">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.4 0 .8-.3 1l-2.2 2.3z"/></svg></div>
-          <div>
-            <b>Voice call · 02:14</b>
-            <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          </div>
-        </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== FEATURE STRIP ===== -->
-  <div class="strip">
+  <!-- ===== FEATURE: business (light) ===== -->
+  <section class="feat">
     <div class="wrap">
-      <span class="label">Everything to stay close</span>
-      <div class="chips">
-        <span class="feat-chip">
-          <i class="ci"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 9 9 0 0 1-3.9-.9L3 21l1.9-5.6A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg></i>
-          Chat
-        </span>
-        <span class="feat-chip">
-          <i class="ci"><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.6 2z"/></svg></i>
-          Voice calls
-        </span>
-        <span class="feat-chip">
-          <i class="ci"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="13" height="12" rx="2"/><path d="m15 10 6-3.5v11L15 14z"/></svg></i>
-          Video calls
-        </span>
-        <span class="feat-chip">
-          <i class="ci"><svg viewBox="0 0 24 24"><path d="M16 19v-2a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v2"/><circle cx="9" cy="8" r="3"/><path d="M22 19v-2a3 3 0 0 0-2.2-2.9M16 5.1A3 3 0 0 1 16 11"/></svg></i>
-          Group calls
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== PILLARS (tingting-inspired, aihoni identity) ===== -->
-  <section class="pillars">
-    <div class="wrap center">
-      <span class="eyebrow reveal">Why aihoni</span>
-      <h2 class="title reveal">One app. Every way to stay close.</h2>
-      <p class="lead reveal">From a quick हालखबर to a whole-family video call — aihoni keeps आफ्ना near, near or far.</p>
-      <div class="pillar-grid">
-        <div class="pillar reveal">
-          <div class="pillar-art shape-reach"><span></span><span></span><span></span></div>
-          <h3>Reach</h3>
-          <p>नेपाल ↔ world. Stay close across any distance, on any network — even a slow one.</p>
+      <div class="feat-grid">
+        <div class="feat-art reveal">
+          <div class="shot"><img src="/img/aihoni-screen/09-business-dashboard.png" alt="aihoni business dashboard with connections and payments" loading="lazy" /></div>
         </div>
-        <div class="pillar reveal d1">
-          <div class="pillar-art shape-talk"><span></span><span></span><span></span><span></span></div>
-          <h3>Talk</h3>
-          <p>Crystal-clear voice and HD video calls that feel like you're in the same room — free.</p>
-        </div>
-        <div class="pillar reveal d2">
-          <div class="pillar-art shape-gather"><span></span><span></span></div>
-          <h3>Gather</h3>
-          <p>Bring the whole family into one group chat or group call, wherever everyone is.</p>
-        </div>
-        <div class="pillar reveal d3">
-          <div class="pillar-art shape-understand"><span></span></div>
-          <h3>Understand</h3>
-          <p>Your AI साथी listens and helps — in नेपाली or English, by voice or text, any time.</p>
+        <div class="feat-copy reveal d1">
+          <h2>aihoni works for you &amp; your business too.</h2>
+          <p>Beyond family and friends, aihoni answers your customers, takes orders and collects payments through eSewa, Khalti, IME Pay and ConnectIPS — the same app, doing double duty for your business.</p>
+          <a class="btn dark" href="/business">Explore for business →</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== FEATURE ROWS (personal first) ===== -->
-  <section>
+  <!-- ===== FEATURE: encryption (dark) ===== -->
+  <section class="feat feat-dark">
     <div class="wrap">
-      <div class="feature-row reveal">
-        <div class="media feature-media">
-          <img src="/img/people/owner-1.jpg" alt="A video call with a loved one" />
-          <div class="media-tag"><span class="dot"></span><div><b>HD video call</b><span class="np">आफ्नासँग आमनेसामने</span></div></div>
+      <div class="feat-grid reverse">
+        <div class="feat-copy reveal">
+          <h2>End-to-end encryption keeps your personal chats private &amp; safe.</h2>
+          <p>Your messages and calls are yours alone. aihoni protects every conversation with end-to-end encryption, so you can speak freely with the people you trust.</p>
+          <a class="btn primary" href="/features">See all features →</a>
         </div>
-        <div>
-          <span class="eyebrow">Voice &amp; video calls</span>
-          <h3>See the people you miss.</h3>
-          <p>Whether your family is in the next village or working across the world, aihoni brings them face to face with crystal-clear voice and HD video calls — free, over any connection.</p>
-          <ul class="ticklist">
-            <li><span class="tick">✓</span> Free voice &amp; HD video calls, near or far</li>
-            <li><span class="tick">✓</span> Works smoothly even on slow networks</li>
-            <li><span class="tick">✓</span> Made for families abroad and back home</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="feature-row reverse reveal">
-        <div class="media feature-media">
-          <img src="/img/people/owner-2.jpg" alt="A group video call with family" />
-          <div class="media-tag"><span class="dot"></span><div><b>Group call · 5 joined</b><span>Whole family</span></div></div>
-        </div>
-        <div>
-          <span class="eyebrow">Group calls</span>
-          <h3>Get the whole family together.</h3>
-          <p>Birthdays, festivals, or just an ordinary evening — gather everyone in one group call or group chat, no matter which city or country they’re in.</p>
-          <div class="tiles">
-            <img src="/img/people/owner-7.jpg" alt="" />
-            <img src="/img/people/owner-6.jpg" alt="" />
-            <img src="/img/people/m-elder.jpg" alt="" />
-            <img src="/img/people/child.jpg" alt="" />
-            <span class="more">+4</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="feature-row reveal">
-        <div class="media feature-media">
-          <img src="/img/people/owner-3.jpg" alt="Chatting with the aihoni AI companion" />
-          <div class="media-tag"><span class="dot"></span><div><b>AI साथी</b><span class="np">सधैं तपाईंसँग</span></div></div>
-        </div>
-        <div>
-          <span class="eyebrow">Your AI साथी</span>
-          <h3>An AI साथी, always there.</h3>
-          <p>Ask anything, any time — in Nepali or English, by voice or chat. From quick questions to a late-night conversation, your AI साथी is always ready to help.</p>
-          <ul class="ticklist">
-            <li><span class="tick">✓</span> Talk in नेपाली or English — by voice or text</li>
-            <li><span class="tick">✓</span> Ask questions, get ideas, or just chat</li>
-            <li><span class="tick">✓</span> Private and always available</li>
-          </ul>
+        <div class="feat-art reveal d1">
+          <div class="shot"><img src="/img/aihoni-screen/14-group-chat.png" alt="An end-to-end encrypted group chat in aihoni" loading="lazy" /></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== HOW IT WORKS ===== -->
-  <section class="dotbg">
-    <div class="wrap center">
-      <span class="eyebrow reveal">How it works</span>
-      <h2 class="title reveal">Start talking in minutes</h2>
-      <p class="lead">If you can make a phone call, you can use aihoni. No tech skills needed.</p>
-      <div class="steps reveal">
-        <div class="step">
-          <div class="num">1</div>
-          <h3>Download &amp; sign in</h3>
-          <p>Get the app and sign in with Google. Choose नेपाली or English to start.</p>
-        </div>
-        <div class="step">
-          <div class="num">2</div>
-          <h3>Add family &amp; friends</h3>
-          <p>Find the people you love and start a chat, a call, or a group in seconds.</p>
-        </div>
-        <div class="step">
-          <div class="num">3</div>
-          <h3>Stay close, for free</h3>
-          <p>Chat, call and video call as much as you like — wherever everyone is.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== STATS BAND ===== -->
-  <section class="band accent">
+  <!-- ===== STATS BAND (sage) ===== -->
+  <section class="band sage">
     <div class="wrap">
-      <div class="stats">
+      <div class="statband reveal">
+        <div class="head">Enormous love from families all over the world</div>
         <div class="stat"><div class="n">50k+</div><div class="l">Families staying close</div></div>
         <div class="stat"><div class="n">40+</div><div class="l">Countries connected</div></div>
-        <div class="stat"><div class="n">Free</div><div class="l">Voice, video &amp; group calls</div></div>
-        <div class="stat"><div class="n">2</div><div class="l">Languages — नेपाली &amp; English</div></div>
+        <div class="stat"><div class="n">100%</div><div class="l">Free calls &amp; chat</div></div>
       </div>
     </div>
   </section>
@@ -262,7 +226,7 @@
         </div>
         <div class="quote">
           <div class="stars">★★★★★</div>
-          <p>“I study in Australia but our whole family still does a group call every Saturday. It feels like we’re all in the same room.”</p>
+          <p>“I study in Australia but our whole family still does a group call every Saturday. It feels like we're all in the same room.”</p>
           <div class="who"><img src="/img/people/owner-3.jpg" alt="" /><div><b>Anjali Tamang</b><span>Student · Sydney</span></div></div>
         </div>
         <div class="quote">
@@ -274,30 +238,10 @@
     </div>
   </section>
 
-  <!-- ===== SECONDARY: BUSINESS ===== -->
-  <section class="dotbg">
-    <div class="wrap">
-      <div class="feature-row reveal">
-        <div>
-          <span class="eyebrow">Also for your business</span>
-          <h3>Run a shop? aihoni helps there too.</h3>
-          <p>Beyond family and friends, aihoni can answer your customers, take orders and collect payments through eSewa, Khalti, IME Pay and ConnectIPS — the same app, doing double duty for your business.</p>
-          <div class="ctas" style="margin-top:22px">
-            <a class="btn dark lg" href="/business">Explore aihoni for business →</a>
-          </div>
-        </div>
-        <div class="media feature-media">
-          <img src="/img/people/owner-5.jpg" alt="A shopkeeper using aihoni for business" />
-          <div class="media-tag"><span class="dot"></span><div><b>Order confirmed</b><span>Rs. 1,250 · eSewa</span></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ===== CTA ===== -->
   <section>
     <div class="cta reveal">
-      <h2 class="np">आफ्नालाई नजिक राख्न तयार?</h2>
+      <h2><span class="rotator" id="ctaline">आफ्नालाई नजिक राख्न तयार?</span></h2>
       <p>Download aihoni free and stay close to the people who matter most.</p>
       <div class="badges">
         <a class="badge" href="https://apps.apple.com/app/aihoni" rel="noopener">
@@ -357,12 +301,8 @@
   </footer>
 
   <script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
-  <script type="importmap">
-  { "imports": { "three": "/js/three.module.js" } }
-  </script>
-  <script type="module" src="/js/connect.js"></script>
-  <script src="/js/reveal.js" defer></script>
   <script src="/js/theme.js" defer></script>
-
+  <script src="/js/reveal.js" defer></script>
+  <script src="/js/rotator.js" defer></script>
 </body>
 </html>
