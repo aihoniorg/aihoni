@@ -37,5 +37,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3.90.0'
           workingDirectory: cloudflare
           command: pages deploy public --project-name=aihoni --branch=main --commit-dirty=true
