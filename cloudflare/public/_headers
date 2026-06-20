@@ -9,6 +9,17 @@
   Content-Type: application/json
   Cache-Control: public, max-age=300
 
+# CSS/JS aren't content-hashed and change between deploys — always revalidate
+# (via etag) so updates are never served stale alongside fresh HTML.
+/css/site.css
+  Cache-Control: public, max-age=0, must-revalidate
+/js/theme.js
+  Cache-Control: public, max-age=0, must-revalidate
+/js/reveal.js
+  Cache-Control: public, max-age=0, must-revalidate
+/js/rotator.js
+  Cache-Control: public, max-age=0, must-revalidate
+
 # CORS — allow the app to fetch from the API
 /api/*
   Access-Control-Allow-Origin: *
